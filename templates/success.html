@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Video Studio — We're On It!</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0a0a0f;
+      color: #e8e8f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: #13131e;
+      border: 1px solid #2a2a3e;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 520px;
+      padding: 56px 44px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+      text-align: center;
+    }
+
+    .icon { font-size: 64px; margin-bottom: 24px; }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 12px;
+    }
+
+    p {
+      color: #888;
+      font-size: 15px;
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+
+    .email {
+      color: #7c6af7;
+      font-weight: 600;
+    }
+
+    .steps {
+      background: #0d0d18;
+      border: 1px solid #2e2e44;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 28px 0;
+      text-align: left;
+    }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .step:last-child { margin-bottom: 0; }
+
+    .step-num {
+      width: 24px;
+      height: 24px;
+      background: #7c6af7;
+      border-radius: 50%;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .step-text {
+      font-size: 13px;
+      color: #c0c0d0;
+      line-height: 1.5;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 8px;
+      color: #7c6af7;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .back-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">🎬</div>
+    <h1>Your video is being produced!</h1>
+    <p>
+      We've kicked off automated production for
+      <strong>{{ product }}</strong>. You'll receive a
+      finished commercial at <span class="email">{{ email }}</span>
+      in approximately 5–15 minutes.
+    </p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">
+          <strong>Script &amp; Storyboard</strong> — Claude AI is writing your
+          voiceover and mapping every shot.
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">
+          <strong>Voiceover</strong> — A professional AI narrator records your script.
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">
+          <strong>Cinematic Visuals</strong> — Higgsfield AI generates each B-roll
+          clip from your prompts.
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text">
+          <strong>Assembly</strong> — Clips, audio, and captions are stitched into
+          a 1080p MP4.
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-text">
+          <strong>Delivery</strong> — Your finished commercial lands in your inbox.
+        </div>
+      </div>
+    </div>
+
+    <p style="font-size:13px;">
+      Check your spam folder if you don't see the email within 20 minutes.
+    </p>
+    <a class="back-link" href="/">← Submit another brief</a>
+  </div>
+</body>
+</html>

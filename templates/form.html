@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Video Studio — Get Your Commercial</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0a0a0f;
+      color: #e8e8f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: #13131e;
+      border: 1px solid #2a2a3e;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 560px;
+      padding: 48px 44px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+    }
+
+    .logo {
+      font-size: 13px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #7c6af7;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 30px;
+      font-weight: 700;
+      line-height: 1.25;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #888;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 36px;
+    }
+
+    .errors {
+      background: #2a1014;
+      border: 1px solid #c0392b;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: #e74c3c;
+    }
+    .errors ul { padding-left: 18px; }
+    .errors li { margin-top: 4px; }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #c0c0d0;
+      margin-bottom: 6px;
+      letter-spacing: 0.3px;
+    }
+
+    .hint {
+      font-size: 11px;
+      color: #555;
+      font-weight: 400;
+      margin-left: 6px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    select,
+    textarea {
+      width: 100%;
+      background: #0d0d18;
+      border: 1px solid #2e2e44;
+      border-radius: 8px;
+      color: #e8e8f0;
+      font-size: 14px;
+      padding: 12px 14px;
+      margin-bottom: 22px;
+      transition: border-color 0.2s;
+      outline: none;
+      font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #7c6af7;
+    }
+    textarea { resize: vertical; min-height: 80px; }
+
+    select option { background: #13131e; }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #7c6af7 0%, #a78bfa 100%);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: opacity 0.2s, transform 0.1s;
+      margin-top: 8px;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn:active { transform: scale(0.99); }
+
+    .disclaimer {
+      color: #444;
+      font-size: 11px;
+      text-align: center;
+      margin-top: 18px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <p class="logo">AI Video Studio</p>
+    <h1>Get Your AI‑Generated Commercial</h1>
+    <p class="subtitle">
+      Fill in your product details below. Our AI will write the script,
+      generate cinematic visuals, add a professional voiceover, and
+      deliver a finished MP4 straight to your inbox — fully automated.
+    </p>
+
+    {% if errors %}
+    <div class="errors">
+      <ul>
+        {% for err in errors %}<li>{{ err }}</li>{% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <form method="POST" action="/generate">
+      <label for="product_name">
+        Product / Brand Name
+        <span class="hint">required</span>
+      </label>
+      <input
+        type="text"
+        id="product_name"
+        name="product_name"
+        placeholder="e.g. ProSleep Pillow"
+        value="{{ product_name or '' }}"
+        required
+      />
+
+      <label for="target_audience">
+        Target Audience
+        <span class="hint">required</span>
+      </label>
+      <textarea
+        id="target_audience"
+        name="target_audience"
+        placeholder="e.g. Busy professionals aged 30–45 who struggle with sleep and want a science-backed solution"
+        required
+      >{{ target_audience or '' }}</textarea>
+
+      <label for="tone">Video Tone / Style</label>
+      <select id="tone" name="tone">
+        <option value="calm, premium, aspirational" {% if tone == 'calm, premium, aspirational' %}selected{% endif %}>
+          Calm &amp; Premium
+        </option>
+        <option value="energetic, bold, fast-paced" {% if tone == 'energetic, bold, fast-paced' %}selected{% endif %}>
+          Energetic &amp; Bold
+        </option>
+        <option value="warm, friendly, relatable" {% if tone == 'warm, friendly, relatable' %}selected{% endif %}>
+          Warm &amp; Friendly
+        </option>
+        <option value="luxurious, cinematic, high-end" {% if tone == 'luxurious, cinematic, high-end' %}selected{% endif %}>
+          Luxurious &amp; Cinematic
+        </option>
+        <option value="informative, trustworthy, professional" {% if tone == 'informative, trustworthy, professional' %}selected{% endif %}>
+          Informative &amp; Professional
+        </option>
+        <option value="playful, fun, youthful" {% if tone == 'playful, fun, youthful' %}selected{% endif %}>
+          Playful &amp; Fun
+        </option>
+      </select>
+
+      <label for="client_email">
+        Delivery Email
+        <span class="hint">where we'll send your finished video</span>
+      </label>
+      <input
+        type="email"
+        id="client_email"
+        name="client_email"
+        placeholder="you@company.com"
+        value="{{ client_email or '' }}"
+        required
+      />
+
+      <button type="submit" class="btn">🎬 Generate My Commercial</button>
+    </form>
+
+    <p class="disclaimer">
+      Production typically takes 5–15 minutes depending on queue depth.<br />
+      You'll receive a ready-to-publish MP4 via email when it's done.
+    </p>
+  </div>
+</body>
+</html>

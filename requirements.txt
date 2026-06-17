@@ -1,0 +1,23 @@
+# ── Web Framework ────────────────────────────────────────────────────────────
+flask>=3.0.0
+
+# ── AI APIs ──────────────────────────────────────────────────────────────────
+anthropic>=0.28.0          # Claude API
+openai>=1.35.0             # TTS voiceover
+
+# ── HTTP ─────────────────────────────────────────────────────────────────────
+requests>=2.32.0
+
+# ── Video Assembly ───────────────────────────────────────────────────────────
+moviepy==1.0.3             # Pinned — v2 has breaking API changes
+# moviepy depends on: imageio, imageio-ffmpeg, decorator, proglog, tqdm
+# ImageMagick must also be installed at the OS level for TextClip captions:
+#   macOS:   brew install imagemagick
+#   Ubuntu:  sudo apt-get install imagemagick
+#   Windows: https://imagemagick.org/script/download.php
+
+# ── Email Delivery ───────────────────────────────────────────────────────────
+sendgrid>=6.11.0
+
+# ── Utilities ────────────────────────────────────────────────────────────────
+python-dotenv>=1.0.0       # Load .env file
