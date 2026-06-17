@@ -2,7 +2,8 @@
 app.py — Flask web server.
 
 Routes:
-  GET  /          → client intake form
+  GET  /          → sales landing page (pay $97 via Stripe)
+  GET  /order     → client intake form (shown after Stripe redirect)
   POST /generate  → validates form, starts pipeline in background thread,
                     redirects to /success
   GET  /success   → confirmation page
@@ -27,6 +28,11 @@ app = Flask(__name__)
 
 @app.route("/", methods=["GET"])
 def index():
+    return render_template("landing.html")
+
+
+@app.route("/order", methods=["GET"])
+def order():
     return render_template("form.html")
 
 
