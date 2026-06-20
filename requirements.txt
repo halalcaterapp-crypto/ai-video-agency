@@ -10,6 +10,7 @@ requests>=2.32.0
 
 # ── Video Assembly ───────────────────────────────────────────────────────────
 moviepy==1.0.3             # Pinned — v2 has breaking API changes
+Pillow==9.5.0              # Pinned — v10+ removed ANTIALIAS which moviepy needs
 # moviepy depends on: imageio, imageio-ffmpeg, decorator, proglog, tqdm
 # ImageMagick must also be installed at the OS level for TextClip captions:
 #   macOS:   brew install imagemagick
