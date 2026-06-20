@@ -7,6 +7,12 @@ Install ImageMagick and ensure the `magick` / `convert` binary is on PATH,
 then set IMAGEMAGICK_BINARY in your .env if it differs from the default.
 """
 
+# Patch for Pillow 10+ compatibility — moviepy 1.0.3 uses Image.ANTIALIAS
+# which was removed in Pillow 10.0.0. This must run before moviepy is imported.
+from PIL import Image
+if not hasattr(Image, "ANTIALIAS"):
+    Image.ANTIALIAS = Image.LANCZOS
+
 import logging
 import os
 import textwrap
