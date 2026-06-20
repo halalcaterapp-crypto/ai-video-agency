@@ -20,13 +20,13 @@ FROM_EMAIL = os.getenv("FROM_EMAIL", "studio@youragency.com")
 FROM_NAME  = os.getenv("FROM_NAME",  "AI Video Studio")
 
 # ── Higgsfield ───────────────────────────────────────────────────────────────
-HIGGSFIELD_BASE_URL = "https://platform.higgsfield.ai"
-HIGGSFIELD_AUTH     = f"Key {HIGGSFIELD_API_KEY}:{HIGGSFIELD_API_SECRET}"
+HIGGSFIELD_BASE_URL = "https://api.higgsfield.ai"
+HIGGSFIELD_AUTH     = f"Bearer {HIGGSFIELD_API_KEY}"
 
-# Text-to-image model (generates the first frame for each shot)
-HIGGSFIELD_T2I_MODEL = "higgsfield-ai/soul/standard"
-# Image-to-video model (animates the generated frame)
-HIGGSFIELD_I2V_MODEL = "higgsfield-ai/dop/standard"
+# Text-to-image model
+HIGGSFIELD_T2I_MODEL = "higgsfield-soul"
+# Image-to-video model
+HIGGSFIELD_I2V_MODEL = "dop-standard"
 
 # Polling
 POLL_INTERVAL_SECONDS = 6     # how often to check generation status
