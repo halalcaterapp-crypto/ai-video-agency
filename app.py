@@ -2,12 +2,12 @@
 app.py — Flask web server.
 
 Routes:
-  GET  /          → sales landing page (pay $97 via Stripe)
-  GET  /order     → client intake form (shown after Stripe redirect)
-  POST /generate  → validates form, starts pipeline in background thread,
-                    redirects to /success
-  GET  /success   → confirmation page
-  GET  /health    → simple uptime check
+  GET  /          -> sales landing page (pay $19.99 via Stripe)
+  GET  /order     -> client intake form (shown after Stripe redirect)
+  POST /generate  -> validates form, starts pipeline in background thread,
+                     redirects to /success
+  GET  /success   -> confirmation page
+  GET  /health    -> simple uptime check
 """
 
 import logging
@@ -58,7 +58,6 @@ def generate():
                                tone=tone,
                                client_email=client_email)
 
-    # Fire and forget — the pipeline can take several minutes
     thread = threading.Thread(
         target=pipeline.run,
         kwargs=dict(
@@ -70,7 +69,7 @@ def generate():
         daemon=True,
     )
     thread.start()
-    logger.info("Pipeline thread started for '%s' → %s", product_name, client_email)
+    logger.info("Pipeline thread started for '%s' -> %s", product_name, client_email)
 
     return redirect(url_for("success", email=client_email, product=product_name))
 
@@ -79,4 +78,14 @@ def generate():
 def success():
     email   = request.args.get("email", "your inbox")
     product = request.args.get("product", "your product")
-    return render_template("success.html", email
+    return render_template("success.html", email=email, product=product)
+
+
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({"status": "ok"})
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
