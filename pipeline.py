@@ -111,8 +111,7 @@ def run(
 
     except Exception as exc:
         tb = traceback.format_exc()
-        logger.error("Pipeline failed:
-%s", tb)
+        logger.error("Pipeline failed:\n%s", tb)
         result["error"] = str(exc)
 
     return result
