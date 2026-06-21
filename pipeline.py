@@ -90,6 +90,11 @@ def run(
         # ── 3. Higgsfield Clip Generation ────────────────────────────────────
         logger.info("═══ STEP 3: Generating %d video clips ═══", len(sb["shots"]))
         enriched_shots = video_gen.generate_all_clips(sb["shots"], job_dir)
+        logger.info("generate_all_clips returned %s with %s items",
+                    type(enriched_shots).__name__,
+                    len(enriched_shots) if enriched_shots is not None else "None")
+        if not enriched_shots:
+            raise RuntimeError(f"generate_all_clips returned empty/None: {enriched_shots!r}")
 
         # ── 4. Video Assembly ────────────────────────────────────────────────
         logger.info("═══ STEP 4: Assembling final video ═══")
@@ -138,11 +143,4 @@ if __name__ == "__main__":
     style        = input("Tone / style:     ").strip() or "calm, premium, aspirational"
     email_addr   = input("Delivery email:   ").strip() or "test@example.com"
 
-    out = run(product, audience, style, email_addr)
-
-    print("\n── Result ──────────────────────────────")
-    print("Success:   ", out["success"])
-    print("Video:     ", out["video_path"])
-    if out["error"]:
-        print("Error:     ", out["error"])
-    sys.exit(0 if out["success"] else 1)
+    out = run(product, audience, sty

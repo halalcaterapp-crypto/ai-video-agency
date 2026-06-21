@@ -140,7 +140,7 @@ def generate_shot_clip(scene_number, prompt, duration_seconds, job_dir):
     logger.info("Shot %02d: Animating to video (%ds)...", scene_number, duration_seconds)
     i2v_data = _hf_submit_and_poll(
         "higgsfield-ai/dop/standard",
-        {"image_url": image_url, "prompt": prompt, "duration": min(duration_seconds, 5)},
+        {"image_url": image_url, "prompt": prompt, "duration": min(duration_seconds, 3)},
     )
     video_url = _extract_url(i2v_data)
     if not video_url:
@@ -164,5 +164,4 @@ def generate_all_clips(shots, job_dir):
             job_dir=job_dir,
         )
         enriched.append({**shot, "clip_path": clip_path})
-    logger.info("All %d clips generated.", len(shots))
-  
+    logger.info("All %d clips generated. Returning %d enr
