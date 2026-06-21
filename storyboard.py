@@ -5,6 +5,7 @@ from a client brief (product name, target audience, tone).
 
 import json
 import logging
+import re
 import anthropic
 import config
 
@@ -77,15 +78,29 @@ def generate_storyboard(product_name: str, target_audience: str, tone: str) -> d
     )
 
     raw = message.content[0].text.strip()
+    logger.debug("Raw storyboard response:\n%s", raw)
 
     # Strip any accidental markdown fences
-    if raw.startswith("```"):
-        raw = raw.split("```")[1]
-        if raw.startswith("json"):
-            raw = raw[4:]
-        raw = raw.strip()
+    raw = re.sub(r"^```(?:json)?\s*", "", raw, flags=re.MULTILINE)
+    raw = re.sub(r"\s*```$", "", raw, flags=re.MULTILINE)
+    raw = raw.strip()
 
-    storyboard = json.loads(raw)
+    # Extract just the JSON object if there's surrounding text
+    json_match = re.search(r'\{[\s\S]*\}', raw)
+    if json_match:
+        raw = json_match.group(0)
+
+    # Try standard parse first, then fall back to relaxed parse
+    try:
+        storyboard = json.loads(raw)
+    except json.JSONDecodeError:
+        # Remove trailing commas before } or ] which Claude sometimes adds
+        raw_fixed = re.sub(r',\s*([}\]])', r'\1', raw)
+        try:
+            storyboard = json.loads(raw_fixed)
+        except json.JSONDecodeError as e:
+            logger.error("Failed to parse storyboard JSON:\n%s", raw)
+            raise ValueError(f"Claude returned invalid JSON: {e}") from e
     logger.info(
         "Storyboard generated: '%s' — %d shots, ~%s seconds",
         storyboard.get("project_title"),
