@@ -10,6 +10,7 @@ requests>=2.32.0
 
 # ── Video Assembly ───────────────────────────────────────────────────────────
 moviepy==1.0.3             # Pinned — v2 has breaking API changes
+higgsfield-client          # Official Higgsfield Python SDK
 # Pillow: use latest (no pin) — ANTIALIAS is patched in assembler.py
 # moviepy depends on: imageio, imageio-ffmpeg, decorator, proglog, tqdm
 # ImageMagick must also be installed at the OS level for TextClip captions:

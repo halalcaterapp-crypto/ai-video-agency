@@ -1,11 +1,8 @@
 """
-video_gen.py — Generate one video clip per shot via Higgsfield's Cloud API.
+video_gen.py — Generate video clips using the Higgsfield Python SDK.
 
-New API (api.higgsfield.ai/v1/generations):
-  1. POST /v1/generations  { task, model, prompt, ... }  → { id, status }
-  2. GET  /v1/generations/{id}                           → { id, status, output }
-
-Auth: Authorization: Bearer {HIGGSFIELD_API_KEY}
+SDK docs: https://github.com/higgsfield-ai/higgsfield-client
+Auth: HF_KEY="api_key:api_secret" env var (set from HIGGSFIELD_API_KEY + HIGGSFIELD_API_SECRET)
 """
 
 import logging
@@ -13,104 +10,28 @@ import os
 import time
 import requests
 from pathlib import Path
+
+# ── Bridge Railway env vars → Higgsfield SDK env vars ─────────────────────────
+# The SDK reads HF_KEY or HF_API_KEY + HF_API_SECRET from environment.
+# We store them as HIGGSFIELD_API_KEY / HIGGSFIELD_API_SECRET in Railway.
+_key    = os.getenv("HIGGSFIELD_API_KEY", "")
+_secret = os.getenv("HIGGSFIELD_API_SECRET", "")
+if _key and _secret:
+    os.environ["HF_KEY"] = f"{_key}:{_secret}"
+elif _key:
+    os.environ["HF_API_KEY"] = _key
+
+import higgsfield_client  # noqa: E402 — must come after env setup
 import config
 
 logger = logging.getLogger(__name__)
 
-SESSION = requests.Session()
-SESSION.headers.update({
-    "Authorization": config.HIGGSFIELD_AUTH,
-    "Content-Type":  "application/json",
-    "Accept":        "application/json",
-})
-
-SUBMIT_URL = f"{config.HIGGSFIELD_BASE_URL}/v1/generations"
+# ── Model IDs ─────────────────────────────────────────────────────────────────
+T2I_MODEL = "bytedance/seedream/v4/text-to-image"
+I2V_MODEL = "higgsfield-ai/dop/standard"
 
 
-# ── Low-level helpers ─────────────────────────────────────────────────────────
-
-def _submit(payload: dict) -> str:
-    """POST a generation request and return the generation id."""
-    logger.debug("Submitting to %s: %s", SUBMIT_URL, payload)
-    resp = SESSION.post(SUBMIT_URL, json=payload, timeout=30)
-    if not resp.ok:
-        logger.error("Higgsfield submit error %d: %s", resp.status_code, resp.text)
-    resp.raise_for_status()
-    data = resp.json()
-    gen_id = data.get("id") or data.get("request_id")
-    logger.debug("Submitted → id=%s", gen_id)
-    return gen_id
-
-
-def _poll(gen_id: str) -> dict:
-    """Poll until the job completes. Returns the full response dict."""
-    status_url = f"{config.HIGGSFIELD_BASE_URL}/v1/generations/{gen_id}"
-    for attempt in range(1, config.MAX_POLL_ATTEMPTS + 1):
-        time.sleep(config.POLL_INTERVAL_SECONDS)
-        try:
-            resp = SESSION.get(status_url, timeout=30)
-            resp.raise_for_status()
-            data = resp.json()
-        except Exception as e:
-            logger.warning("Poll %d/%d — network error (%s), retrying...",
-                           attempt, config.MAX_POLL_ATTEMPTS, e)
-            continue
-
-        status = data.get("status", "unknown")
-        logger.debug("Poll %d/%d → %s", attempt, config.MAX_POLL_ATTEMPTS, status)
-
-        if status in ("completed", "succeeded", "success"):
-            return data
-        if status in ("failed", "error", "nsfw", "cancelled"):
-            logger.error("Higgsfield job %s failed. Full response: %s", gen_id, data)
-            raise RuntimeError(
-                f"Higgsfield job {gen_id} ended with status '{status}'"
-            )
-        # queued | processing | in_progress → keep waiting
-
-    raise TimeoutError(
-        f"Higgsfield job {gen_id} did not complete within "
-        f"{config.MAX_POLL_ATTEMPTS * config.POLL_INTERVAL_SECONDS}s"
-    )
-
-
-def _extract_image_url(data: dict) -> str:
-    """Pull the image URL out of a completed generation response."""
-    # Try common response shapes
-    output = data.get("output") or data
-    if isinstance(output, list):
-        output = output[0]
-    for key in ("url", "image_url", "image", "result"):
-        if key in output:
-            val = output[key]
-            if isinstance(val, list):
-                return val[0].get("url") or val[0]
-            return val
-    # Fallback: scan all values for a URL string
-    for v in output.values():
-        if isinstance(v, str) and v.startswith("http"):
-            return v
-    raise ValueError(f"Cannot find image URL in response: {data}")
-
-
-def _extract_video_url(data: dict) -> str:
-    """Pull the video URL out of a completed generation response."""
-    output = data.get("output") or data
-    if isinstance(output, list):
-        output = output[0]
-    for key in ("url", "video_url", "video", "result", "mp4_url"):
-        if key in output:
-            val = output[key]
-            if isinstance(val, dict):
-                return val.get("url", "")
-            if isinstance(val, list):
-                return val[0].get("url") or val[0]
-            return val
-    for v in output.values():
-        if isinstance(v, str) and v.startswith("http"):
-            return v
-    raise ValueError(f"Cannot find video URL in response: {data}")
-
+# ── Helpers ───────────────────────────────────────────────────────────────────
 
 def _download(url: str, dest_path: str) -> str:
     """Download a file from url to dest_path. Returns dest_path."""
@@ -123,6 +44,41 @@ def _download(url: str, dest_path: str) -> str:
     size_kb = os.path.getsize(dest_path) / 1024
     logger.debug("Downloaded %.1f KB → %s", size_kb, dest_path)
     return dest_path
+
+
+def _extract_image_url(result: dict) -> str:
+    """Pull image URL from SDK result."""
+    logger.debug("T2I result: %s", result)
+    if "images" in result:
+        imgs = result["images"]
+        if isinstance(imgs, list) and imgs:
+            img = imgs[0]
+            return img["url"] if isinstance(img, dict) else img
+    if "url" in result:
+        return result["url"]
+    if "output" in result:
+        out = result["output"]
+        if isinstance(out, list) and out:
+            return out[0].get("url") or out[0]
+        if isinstance(out, dict):
+            return out.get("url", "")
+    raise ValueError(f"Cannot find image URL in T2I result: {result}")
+
+
+def _extract_video_url(result: dict) -> str:
+    """Pull video URL from SDK result."""
+    logger.debug("I2V result: %s", result)
+    for key in ("video", "videos", "url", "output"):
+        if key in result:
+            val = result[key]
+            if isinstance(val, dict):
+                return val.get("url", "")
+            if isinstance(val, list) and val:
+                item = val[0]
+                return item.get("url") if isinstance(item, dict) else item
+            if isinstance(val, str) and val.startswith("http"):
+                return val
+    raise ValueError(f"Cannot find video URL in I2V result: {result}")
 
 
 # ── Per-shot generation ───────────────────────────────────────────────────────
@@ -142,35 +98,36 @@ def generate_shot_clip(
 
     # ── Step 1: Text → Image ─────────────────────────────────────────────────
     logger.info("Shot %02d: Generating keyframe image...", scene_number)
-    t2i_id = _submit({
-        "task":    "text-to-image",
-        "model":   config.HIGGSFIELD_T2I_MODEL,
-        "prompt":  prompt,
-        "width":   1280,
-        "height":  720,
-    })
-    t2i_result = _poll(t2i_id)
-    image_cdn_url = _extract_image_url(t2i_result)
-    logger.info("Shot %02d: Image ready.", scene_number)
+    t2i_result = higgsfield_client.subscribe(
+        T2I_MODEL,
+        arguments={
+            "prompt":       prompt,
+            "resolution":   "2K",
+            "aspect_ratio": "16:9",
+            "camera_fixed": False,
+        }
+    )
+    image_url = _extract_image_url(t2i_result)
+    logger.info("Shot %02d: Image ready → %s", scene_number, image_url)
 
-    ext = image_cdn_url.split("?")[0].rsplit(".", 1)[-1] or "jpg"
-    _download(image_cdn_url, os.path.join(shot_dir, f"keyframe.{ext}"))
+    ext = image_url.split("?")[0].rsplit(".", 1)[-1] or "jpg"
+    _download(image_url, os.path.join(shot_dir, f"keyframe.{ext}"))
 
     # ── Step 2: Image → Video ─────────────────────────────────────────────────
     logger.info("Shot %02d: Animating to video (target %ds)...", scene_number, duration_seconds)
-    i2v_id = _submit({
-        "task":        "image-to-video",
-        "model":       config.HIGGSFIELD_I2V_MODEL,
-        "prompt":      prompt,
-        "input_image": image_cdn_url,
-        "duration":    duration_seconds,
-    })
-    i2v_result = _poll(i2v_id)
-    video_cdn_url = _extract_video_url(i2v_result)
-    logger.info("Shot %02d: Video ready.", scene_number)
+    i2v_result = higgsfield_client.subscribe(
+        I2V_MODEL,
+        arguments={
+            "image_url": image_url,
+            "prompt":    prompt,
+            "duration":  duration_seconds,
+        }
+    )
+    video_url = _extract_video_url(i2v_result)
+    logger.info("Shot %02d: Video ready → %s", scene_number, video_url)
 
     clip_path = os.path.join(shot_dir, "clip.mp4")
-    _download(video_cdn_url, clip_path)
+    _download(video_url, clip_path)
     logger.info("Shot %02d: Clip saved → %s", scene_number, clip_path)
     return clip_path
 
