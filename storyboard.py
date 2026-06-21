@@ -1,5 +1,5 @@
 """
-storyboard.py — Call Claude to generate a fully structured shot-list JSON
+storyboard.py - Call Claude to generate a fully structured shot-list JSON
 from a client brief (product name, target audience, tone).
 """
 
@@ -27,12 +27,12 @@ Example of a good Higgsfield prompt:
 reflecting off puddles, low angle tracking shot following the car, cinematic 8k resolution, photorealistic."
 
 STRICT OUTPUT RULES:
-1. You must output ONLY valid, raw JSON — no markdown fences, no commentary.
+1. You must output ONLY valid, raw JSON with NO markdown fences and NO commentary.
 2. The JSON must strictly follow this schema:
 {
   "project_title": "A catchy title for the video",
   "full_voiceover": "The complete spoken script for the video.",
-  "total_estimated_duration": "Total seconds as a number string, e.g. 30",
+  "total_estimated_duration": 30,
   "shots": [
     {
       "scene_number": 1,
@@ -43,21 +43,14 @@ STRICT OUTPUT RULES:
   ]
 }
 3. Produce between 6 and 10 shots. Keep the total voiceover under 60 seconds.
-4. Every higgsfield_prompt must be photorealistic, cinematic, and detailed."""
+4. Every higgsfield_prompt must be photorealistic, cinematic, and detailed.
+5. Output ONLY the JSON object. No other text before or after."""
 
 
-def generate_storyboard(product_name: str, target_audience: str, tone: str) -> dict:
+def generate_storyboard(product_name, target_audience, tone):
     """
     Call Claude with the director system prompt and client brief.
     Returns the parsed shot-list dict.
-
-    Args:
-        product_name:     e.g. "ProSleep Pillow"
-        target_audience:  e.g. "busy professionals aged 30-45 who struggle with sleep"
-        tone:             e.g. "calm, premium, aspirational"
-
-    Returns:
-        dict matching the schema above
     """
     client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
 
@@ -65,7 +58,7 @@ def generate_storyboard(product_name: str, target_audience: str, tone: str) -> d
         f"Product: {product_name}\n"
         f"Target Audience: {target_audience}\n"
         f"Tone / Style: {tone}\n\n"
-        "Generate a complete video shot list for this product. Output ONLY the raw JSON — no other text."
+        "Generate a complete video shot list for this product. Output ONLY the raw JSON object."
     )
 
     logger.info("Calling Claude to generate storyboard for '%s'...", product_name)
@@ -78,16 +71,40 @@ def generate_storyboard(product_name: str, target_audience: str, tone: str) -> d
     )
 
     raw = message.content[0].text.strip()
-    logger.debug("Raw storyboard response:\n%s", raw)
+    logger.debug("Raw storyboard response (first 200 chars):\n%s", raw[:200])
 
     # Strip any accidental markdown fences
     raw = re.sub(r"^```(?:json)?\s*", "", raw, flags=re.MULTILINE)
-    raw = re.sub(r"\s*```$", "", raw, flags=re.MULTILINE)
+    raw = re.sub(r"\s*```\s*$", "", raw, flags=re.MULTILINE)
     raw = raw.strip()
 
-    # Extract just the JSON object if there's surrounding text
+    # Extract just the JSON object if there is surrounding text
     json_match = re.search(r'\{[\s\S]*\}', raw)
     if json_match:
         raw = json_match.group(0)
 
-    # Try standard parse first, then fall back to re
+    # Try standard parse first, then fall back to relaxed parse
+    try:
+        result = json.loads(raw)
+    except json.JSONDecodeError:
+        # Remove trailing commas before } or ] which Claude sometimes adds
+        raw_fixed = re.sub(r',\s*([}\]])', r'\1', raw)
+        try:
+            result = json.loads(raw_fixed)
+        except json.JSONDecodeError as e:
+            logger.error("Failed to parse storyboard JSON. Raw response:\n%s", raw)
+            raise ValueError(f"Claude returned invalid JSON: {e}") from e
+
+    if not isinstance(result, dict):
+        raise ValueError(f"Storyboard must be a JSON object, got: {type(result).__name__}")
+
+    if "full_voiceover" not in result or "shots" not in result:
+        raise ValueError(f"Storyboard missing required keys. Got keys: {list(result.keys())}")
+
+    logger.info(
+        "Storyboard generated: '%s' - %d shots, ~%s seconds",
+        result.get("project_title", "Untitled"),
+        len(result.get("shots", [])),
+        result.get("total_estimated_duration", "?"),
+    )
+    return result
