@@ -82,11 +82,9 @@ def _hf_submit_and_poll(endpoint, payload):
     resp.raise_for_status()
     data = resp.json()
 
-    # Check if result is already available in submit response
     if _extract_url(data):
         return data
 
-    # Get request_id and status_url from response
     request_id = (
         data.get("request_id") or data.get("id") or
         data.get("requestId") or (data.get("data") or {}).get("id")
@@ -94,15 +92,13 @@ def _hf_submit_and_poll(endpoint, payload):
     if not request_id:
         raise ValueError(f"No request_id in response: {data}")
 
-    # Use status_url from response if available, otherwise construct it
-    # Correct Higgsfield format: /requests/{id}/status  (plural, with /status)
     status_url = (
         data.get("status_url") or
         data.get("statusUrl") or
         f"{HF_BASE}/requests/{request_id}/status"
     )
 
-    logger.info("Job submitted, request_id=%s — polling %s", request_id, status_url)
+    logger.info("Job submitted, request_id=%s -- polling %s", request_id, status_url)
 
     for attempt in range(MAX_POLLS):
         time.sleep(POLL_INTERVAL)
@@ -110,7 +106,7 @@ def _hf_submit_and_poll(endpoint, payload):
         sr.raise_for_status()
         sdata = sr.json()
         status = (sdata.get("status") or sdata.get("state") or "").lower()
-        logger.info("Poll %d — status=%s", attempt + 1, status)
+        logger.info("Poll %d -- status=%s", attempt + 1, status)
 
         if status in ("completed", "succeeded", "done", "success"):
             return sdata
@@ -124,7 +120,6 @@ def generate_shot_clip(scene_number, prompt, duration_seconds, job_dir):
     shot_dir = os.path.join(job_dir, f"shot_{scene_number:02d}")
     os.makedirs(shot_dir, exist_ok=True)
 
-    # Step 1: Text -> Image (Higgsfield Soul Standard)
     logger.info("Shot %02d: Generating keyframe via Higgsfield Soul Standard...", scene_number)
     t2i_data = _hf_submit_and_poll(
         "higgsfield-ai/soul/standard",
@@ -136,7 +131,6 @@ def generate_shot_clip(scene_number, prompt, duration_seconds, job_dir):
     logger.info("Shot %02d: Image ready -> %s", scene_number, image_url)
     _download(image_url, os.path.join(shot_dir, "keyframe.jpg"))
 
-    # Step 2: Image -> Video (Higgsfield DoP Standard)
     logger.info("Shot %02d: Animating to video (%ds)...", scene_number, duration_seconds)
     i2v_data = _hf_submit_and_poll(
         "higgsfield-ai/dop/standard",
@@ -164,4 +158,5 @@ def generate_all_clips(shots, job_dir):
             job_dir=job_dir,
         )
         enriched.append({**shot, "clip_path": clip_path})
-    logger.info("All %d clips generated. Returning %d enr
+    logger.info("All %d clips generated successfully.", len(shots))
+    return enriched
