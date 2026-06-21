@@ -79,14 +79,4 @@ def generate():
 def success():
     email   = request.args.get("email", "your inbox")
     product = request.args.get("product", "your product")
-    return render_template("success.html", email=email, product=product)
-
-
-@app.route("/health", methods=["GET"])
-def health():
-    return jsonify({"status": "ok"})
-
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    return render_template("success.html", email

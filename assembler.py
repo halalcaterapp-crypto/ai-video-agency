@@ -176,12 +176,4 @@ def assemble_video(
     # Cleanup
     final_video.close()
     tts_audio.close()
-    for c in processed_clips:
-        try:
-            c.close()
-        except Exception:
-            pass
-
-    size_mb = os.path.getsize(output_path) / (1024 * 1024)
-    logger.info("Final video saved: %s (%.1f MB)", output_path, size_mb)
-    return output_path
+    for c in 

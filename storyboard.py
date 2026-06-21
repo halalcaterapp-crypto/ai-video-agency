@@ -90,21 +90,4 @@ def generate_storyboard(product_name: str, target_audience: str, tone: str) -> d
     if json_match:
         raw = json_match.group(0)
 
-    # Try standard parse first, then fall back to relaxed parse
-    try:
-        storyboard = json.loads(raw)
-    except json.JSONDecodeError:
-        # Remove trailing commas before } or ] which Claude sometimes adds
-        raw_fixed = re.sub(r',\s*([}\]])', r'\1', raw)
-        try:
-            storyboard = json.loads(raw_fixed)
-        except json.JSONDecodeError as e:
-            logger.error("Failed to parse storyboard JSON:\n%s", raw)
-            raise ValueError(f"Claude returned invalid JSON: {e}") from e
-    logger.info(
-        "Storyboard generated: '%s' — %d shots, ~%s seconds",
-        storyboard.get("project_title"),
-        len(storyboard.get("shots", [])),
-        storyboard.get("total_estimated_duration"),
-    )
-    return storyboard
+    # Try standard parse first, then fall back to re

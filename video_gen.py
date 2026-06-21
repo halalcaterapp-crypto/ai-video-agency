@@ -181,32 +181,4 @@ def generate_shot_clip(
 
     # ── Step 2: Image → Video (Higgsfield DoP Standard) ──────────────────────
     logger.info("Shot %02d: Animating keyframe (target %ds)...", scene_number, duration_seconds)
-    # Use the temporary DALL-E URL directly — Higgsfield fetches it during generation
-    # (the URL is valid long enough since we submit immediately after download)
-    video_url = _higgsfield_i2v(dalle_url, prompt, duration_seconds)
-    logger.info("Shot %02d: Video ready → %s", scene_number, video_url)
-
-    clip_path = os.path.join(shot_dir, "clip.mp4")
-    _download(video_url, clip_path)
-    logger.info("Shot %02d: Clip saved → %s", scene_number, clip_path)
-    return clip_path
-
-
-# ── Batch generation ──────────────────────────────────────────────────────────
-
-def generate_all_clips(shots: list[dict], job_dir: str) -> list[dict]:
-    """Iterate through shots and generate a clip for each."""
-    enriched = []
-    total = len(shots)
-    for i, shot in enumerate(shots, start=1):
-        logger.info("▶ Generating clip %d/%d (scene %d)...", i, total, shot["scene_number"])
-        clip_path = generate_shot_clip(
-            scene_number=shot["scene_number"],
-            prompt=shot["higgsfield_prompt"],
-            duration_seconds=shot["duration_seconds"],
-            job_dir=job_dir,
-        )
-        enriched.append({**shot, "clip_path": clip_path})
-
-    logger.info("All %d clips generated.", total)
-    return enriched
+    # Use the temporary DALL-E URL directly — Higgsfield fetches it during gen
