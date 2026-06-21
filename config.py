@@ -8,11 +8,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # API Keys
-ANTHROPIC_API_KEY     = os.getenv("ANTHROPIC_API_KEY", "")
-OPENAI_API_KEY        = os.getenv("OPENAI_API_KEY", "")
-HIGGSFIELD_API_KEY    = os.getenv("HIGGSFIELD_API_KEY", "")
-HIGGSFIELD_API_SECRET = os.getenv("HIGGSFIELD_API_SECRET", "")
-SENDGRID_API_KEY      = os.getenv("SENDGRID_API_KEY", "")
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+OPENAI_API_KEY    = os.getenv("OPENAI_API_KEY", "")
+SENDGRID_API_KEY  = os.getenv("SENDGRID_API_KEY", "")
+
+# Higgsfield - support both naming conventions
+HIGGSFIELD_API_KEY    = os.getenv("HIGGSFIELD_API_KEY") or os.getenv("HF_API_KEY", "")
+HIGGSFIELD_API_SECRET = os.getenv("HIGGSFIELD_API_SECRET") or os.getenv("HF_API_SECRET", "")
 
 # Email / Branding
 FROM_EMAIL = os.getenv("FROM_EMAIL", "studio@swiftaivideos.com")
