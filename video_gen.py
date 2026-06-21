@@ -52,7 +52,7 @@ def _extract_url(data):
     for key in ("url", "image_url", "video_url", "imageUrl", "videoUrl"):
         if key in data and isinstance(data[key], str) and data[key].startswith("http"):
             return data[key]
-    for key in ("images", "videos", "output", "result", "data"):
+    for key in ("video", "image", "images", "videos", "output", "result", "data"):
         val = data.get(key)
         if isinstance(val, list) and val:
             item = val[0]
@@ -165,4 +165,4 @@ def generate_all_clips(shots, job_dir):
         )
         enriched.append({**shot, "clip_path": clip_path})
     logger.info("All %d clips generated.", len(shots))
-    return enriched
+  
