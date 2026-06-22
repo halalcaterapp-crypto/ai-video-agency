@@ -8,6 +8,7 @@ import logging
 import os
 import subprocess
 from pathlib import Path
+import imageio_ffmpeg
 
 logger = logging.getLogger(__name__)
 
@@ -15,9 +16,13 @@ TARGET_WIDTH  = 1280
 TARGET_HEIGHT = 720
 TARGET_FPS    = 24
 
+# Use bundled ffmpeg binary from imageio-ffmpeg (no system install needed)
+_FFMPEG_EXE = imageio_ffmpeg.get_ffmpeg_exe()
+logger.info("Using ffmpeg: %s", _FFMPEG_EXE)
+
 
 def _ffmpeg(args, desc="ffmpeg"):
-    cmd = ["ffmpeg", "-y"] + args
+    cmd = [_FFMPEG_EXE, "-y"] + args
     logger.info("ffmpeg [%s]: %s", desc, " ".join(cmd[-6:]))
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
