@@ -95,7 +95,6 @@ def assemble_video(enriched_shots, voiceover_path, output_path):
         "-i", voiceover_path,
         "-c:v", "copy",
         "-c:a", "aac", "-b:a", "192k",
-        "-shortest",
         output_path,
     ], "audio mix")
     logger.info("Assembly complete: %s", output_path)

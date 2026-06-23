@@ -42,7 +42,7 @@ STRICT OUTPUT RULES:
     }
   ]
 }
-3. Produce exactly 5 shots. Keep the total voiceover under 20 seconds.
+3. Produce exactly 5 shots. The total voiceover should be 15-20 seconds long (3-4 sentences).
 4. Every higgsfield_prompt must be photorealistic, cinematic, and detailed.
 5. Output ONLY the JSON object. No other text before or after."""
 
