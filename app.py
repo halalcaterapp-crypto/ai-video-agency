@@ -13,7 +13,9 @@ Routes:
 import logging
 import os
 import threading
+import uuid
 from flask import Flask, render_template, request, redirect, url_for, jsonify
+import config
 import pipeline
 
 logging.basicConfig(
@@ -42,6 +44,7 @@ def generate():
     target_audience = request.form.get("target_audience", "").strip()
     tone            = request.form.get("tone", "").strip()
     client_email    = request.form.get("client_email", "").strip()
+    generate_logo   = request.form.get("generate_logo") == "1"
 
     errors = []
     if not product_name:
@@ -58,6 +61,19 @@ def generate():
                                tone=tone,
                                client_email=client_email)
 
+    # Handle optional logo upload
+    logo_path = None
+    logo_file = request.files.get("logo")
+    if logo_file and logo_file.filename:
+        # Save to a temp location so the pipeline thread can access it
+        ext = os.path.splitext(logo_file.filename)[1].lower() or ".png"
+        safe_ext = ext if ext in (".png", ".jpg", ".jpeg", ".webp") else ".png"
+        tmp_name = f"upload_logo_{uuid.uuid4().hex[:8]}{safe_ext}"
+        logo_path = os.path.join(config.BASE_OUTPUT_DIR, tmp_name)
+        logo_file.save(logo_path)
+        logger.info("Logo uploaded -> %s", logo_path)
+        generate_logo = False  # uploaded logo takes priority over generation
+
     thread = threading.Thread(
         target=pipeline.run,
         kwargs=dict(
@@ -65,11 +81,14 @@ def generate():
             target_audience=target_audience,
             tone=tone or "professional, cinematic, compelling",
             client_email=client_email,
+            logo_path=logo_path,
+            generate_logo=generate_logo,
         ),
         daemon=True,
     )
     thread.start()
-    logger.info("Pipeline thread started for '%s' -> %s", product_name, client_email)
+    logger.info("Pipeline thread started for '%s' -> %s (logo: %s)",
+                product_name, client_email, logo_path or ("generate" if generate_logo else "none"))
 
     return redirect(url_for("success", email=client_email, product=product_name))
 

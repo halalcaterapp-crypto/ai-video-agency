@@ -31,7 +31,7 @@ def _ffmpeg(args, desc="ffmpeg"):
     return result
 
 
-def assemble_video(enriched_shots, voiceover_path, output_path):
+def assemble_video(enriched_shots, voiceover_path, output_path, logo_path=None):
     """
     Combine all clips + audio into the final MP4 using ffmpeg subprocess.
 
@@ -39,6 +39,7 @@ def assemble_video(enriched_shots, voiceover_path, output_path):
         enriched_shots: Shot dicts with 'clip_path', 'duration_seconds', 'scene_number'.
         voiceover_path: Path to the TTS MP3 file.
         output_path:    Where to write the final MP4.
+        logo_path:      Optional path to a PNG/JPG logo; overlaid in the bottom-right corner.
 
     Returns:
         output_path on success.
@@ -90,13 +91,39 @@ def assemble_video(enriched_shots, voiceover_path, output_path):
 
     # Step 4: Mix voiceover audio
     logger.info("Mixing voiceover from '%s' ...", voiceover_path)
+    # If no logo, write directly to output_path; otherwise write to a temp file first
+    audio_mixed = output_path if not logo_path else os.path.join(job_dir, "audio_mixed.mp4")
     _ffmpeg([
         "-i", concat_mp4,
         "-i", voiceover_path,
         "-c:v", "copy",
         "-c:a", "aac", "-b:a", "192k",
-        output_path,
+        audio_mixed,
     ], "audio mix")
+    logger.info("Audio mixed -> %s", audio_mixed)
+
+    # Step 5 (optional): Overlay logo in bottom-right corner
+    if logo_path and os.path.exists(logo_path):
+        logger.info("Overlaying logo '%s' ...", logo_path)
+        _ffmpeg([
+            "-i", audio_mixed,
+            "-i", logo_path,
+            "-filter_complex",
+            # Scale logo to 200px wide (keep aspect ratio), set 75% opacity, overlay bottom-right
+            "[1:v]scale=200:-1,format=rgba,colorchannelmixer=aa=0.75[logo];"
+            "[0:v][logo]overlay=W-w-20:H-h-20",
+            "-c:a", "copy",
+            output_path,
+        ], "logo overlay")
+        try:
+            os.remove(audio_mixed)
+        except Exception:
+            pass
+        logger.info("Logo overlaid -> %s", output_path)
+    else:
+        if logo_path:
+            logger.warning("Logo path not found, skipping overlay: %s", logo_path)
+
     logger.info("Assembly complete: %s", output_path)
 
     # Cleanup temp files

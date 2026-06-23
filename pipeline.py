@@ -24,6 +24,7 @@ import tts
 import video_gen
 import assembler
 import email_sender
+import logo_gen
 
 logging.basicConfig(
     level=logging.INFO,
@@ -49,6 +50,8 @@ def run(
     target_audience: str,
     tone: str,
     client_email: str,
+    logo_path: str = None,
+    generate_logo: bool = False,
 ) -> dict:
     """Execute the complete pipeline for one client submission."""
     job_dir = _make_job_dir(product_name)
@@ -84,6 +87,15 @@ def run(
         if not enriched_shots:
             raise RuntimeError(f"generate_all_clips returned empty/None: {enriched_shots!r}")
 
+        # -- 3.5. Logo (optional)
+        if generate_logo and not logo_path:
+            logger.info("=== STEP 3.5: Generating logo with DALL-E ===")
+            try:
+                logo_path = logo_gen.generate_logo(product_name, job_dir)
+            except Exception as logo_err:
+                logger.warning("Logo generation failed (skipping): %s", logo_err)
+                logo_path = None
+
         # -- 4. Video Assembly
         logger.info("=== STEP 4: Assembling final video ===")
         safe_title = "".join(
@@ -91,7 +103,7 @@ def run(
         ).strip().replace(" ", "_")[:50]
         final_path = os.path.join(job_dir, f"{safe_title}_final.mp4")
 
-        assembler.assemble_video(enriched_shots, voiceover_path, final_path)
+        assembler.assemble_video(enriched_shots, voiceover_path, final_path, logo_path=logo_path)
         result["video_path"] = final_path
 
         # -- 5. Email Delivery

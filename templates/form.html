@@ -79,6 +79,58 @@
       margin-left: 6px;
     }
 
+    input[type="file"] {
+      width: 100%;
+      background: #0d0d18;
+      border: 1px dashed #2e2e44;
+      border-radius: 8px;
+      color: #888;
+      font-size: 13px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    input[type="file"]:hover { border-color: #7c6af7; }
+
+    .logo-section {
+      margin-bottom: 22px;
+    }
+    .logo-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 14px;
+      background: #0d0d18;
+      border: 1px solid #2e2e44;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .logo-option:hover { border-color: #7c6af7; }
+    .logo-option input[type="radio"] {
+      width: auto;
+      margin: 0;
+      margin-top: 2px;
+      accent-color: #7c6af7;
+      flex-shrink: 0;
+    }
+    .logo-option-text strong {
+      display: block;
+      font-size: 13px;
+      color: #e8e8f0;
+      margin-bottom: 2px;
+    }
+    .logo-option-text span {
+      font-size: 11px;
+      color: #555;
+    }
+    #logo-upload-area {
+      margin-top: 8px;
+    }
+    #logo-upload-area.hidden { display: none; }
+
     input[type="text"],
     input[type="email"],
     select,
@@ -147,7 +199,7 @@
     </div>
     {% endif %}
 
-    <form method="POST" action="/generate">
+    <form method="POST" action="/generate" enctype="multipart/form-data">
       <label for="product_name">
         Product / Brand Name
         <span class="hint">required</span>
@@ -207,8 +259,47 @@
         required
       />
 
+      <label>Logo <span class="hint">optional — appears in bottom-right corner</span></label>
+      <div class="logo-section">
+        <label class="logo-option">
+          <input type="radio" name="logo_choice" value="none" checked onchange="handleLogoChoice(this.value)" />
+          <div class="logo-option-text">
+            <strong>No logo</strong>
+            <span>Skip — just deliver the video</span>
+          </div>
+        </label>
+        <label class="logo-option">
+          <input type="radio" name="logo_choice" value="upload" onchange="handleLogoChoice(this.value)" />
+          <div class="logo-option-text">
+            <strong>Upload my logo</strong>
+            <span>PNG or JPG recommended</span>
+          </div>
+        </label>
+        <div id="logo-upload-area" class="hidden">
+          <input type="file" name="logo" id="logo" accept="image/png,image/jpeg,image/jpg,image/webp" />
+        </div>
+        <label class="logo-option">
+          <input type="radio" name="logo_choice" value="generate" onchange="handleLogoChoice(this.value)" />
+          <div class="logo-option-text">
+            <strong>Generate a logo for me with AI</strong>
+            <span>Icon + text style, created from your brand name</span>
+          </div>
+        </label>
+        <input type="hidden" name="generate_logo" id="generate_logo_flag" value="0" />
+      </div>
+
       <button type="submit" class="btn">🎬 Generate My Commercial</button>
     </form>
+
+    <script>
+      function handleLogoChoice(val) {
+        document.getElementById('logo-upload-area').classList.toggle('hidden', val !== 'upload');
+        document.getElementById('generate_logo_flag').value = val === 'generate' ? '1' : '0';
+        if (val !== 'upload') {
+          document.getElementById('logo').value = '';
+        }
+      }
+    </script>
 
     <p class="disclaimer">
       Production typically takes 5–15 minutes depending on queue depth.<br />
