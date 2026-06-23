@@ -75,7 +75,8 @@ def assemble_video(enriched_shots, voiceover_path, output_path):
     concat_txt = os.path.join(job_dir, "concat.txt")
     with open(concat_txt, "w") as f:
         for p in normalized:
-            f.write(f"file '{p}'\n")
+            # Use basename only — ffmpeg resolves paths relative to concat.txt's directory
+            f.write(f"file '{os.path.basename(p)}'\n")
 
     # Step 3: Concatenate clips
     concat_mp4 = os.path.join(job_dir, "concat_video.mp4")
