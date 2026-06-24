@@ -22,6 +22,21 @@ HF_BASE = "https://platform.higgsfield.ai"
 POLL_INTERVAL = 8
 MAX_POLLS = 150
 
+# Suffix appended to prompts on NSFW retry — strips risky language, asserts safety
+_NSFW_SAFE_SUFFIX = (
+    ", clean professional commercial, fully clothed people only, "
+    "safe for all audiences, family-friendly advertising, "
+    "no nudity, no suggestive content, no violence, no text, no watermarks, "
+    "photorealistic 8K, luxury commercial grade"
+)
+
+
+def _make_safe_prompt(prompt: str) -> str:
+    """Truncate prompt and append explicit safety markers for NSFW retry."""
+    # Keep first 150 chars (core subject/scene), drop any trailing partial word
+    short = prompt[:150].rsplit(" ", 1)[0]
+    return short + _NSFW_SAFE_SUFFIX
+
 
 def _hf_headers():
     key    = config.HIGGSFIELD_API_KEY
@@ -116,15 +131,31 @@ def _hf_submit_and_poll(endpoint, payload):
     raise TimeoutError(f"Higgsfield job timed out after {MAX_POLLS * POLL_INTERVAL}s")
 
 
+def _submit_t2i(prompt, scene_number):
+    """Submit T2I job; retry with a safe prompt if Higgsfield returns NSFW."""
+    payload = {"prompt": prompt, "aspect_ratio": "16:9", "resolution": "720p"}
+    try:
+        return _hf_submit_and_poll("higgsfield-ai/soul/standard", payload)
+    except RuntimeError as exc:
+        if "nsfw" in str(exc).lower():
+            safe_prompt = _make_safe_prompt(prompt)
+            logger.warning(
+                "Shot %02d NSFW flagged — retrying with safe prompt (len=%d)...",
+                scene_number, len(safe_prompt),
+            )
+            return _hf_submit_and_poll(
+                "higgsfield-ai/soul/standard",
+                {"prompt": safe_prompt, "aspect_ratio": "16:9", "resolution": "720p"},
+            )
+        raise
+
+
 def generate_shot_clip(scene_number, prompt, duration_seconds, job_dir):
     shot_dir = os.path.join(job_dir, f"shot_{scene_number:02d}")
     os.makedirs(shot_dir, exist_ok=True)
 
     logger.info("Shot %02d: Generating keyframe via Higgsfield Soul Standard...", scene_number)
-    t2i_data = _hf_submit_and_poll(
-        "higgsfield-ai/soul/standard",
-        {"prompt": prompt, "aspect_ratio": "16:9", "resolution": "720p"},
-    )
+    t2i_data = _submit_t2i(prompt, scene_number)
     image_url = _extract_url(t2i_data)
     if not image_url:
         raise ValueError(f"No image URL in T2I response: {t2i_data}")

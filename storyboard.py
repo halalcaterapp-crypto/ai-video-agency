@@ -56,7 +56,8 @@ slow swirling foam, golden pollen floating
 
 FILM QUALITY MARKERS — end every single prompt with these exact words:
 "shot on ARRI Alexa Mini LF, anamorphic 2.39:1 widescreen, extremely shallow depth of field, \
-photorealistic 8K, luxury commercial grade, no text, no watermarks"
+photorealistic 8K, luxury commercial grade, safe for all audiences, \
+no nudity, no violence, no text, no watermarks"
 
 ═══════════════════════════════════════════════
 EXAMPLE of an excellent Higgsfield prompt (study this structure)
@@ -69,7 +70,7 @@ glistening on the glass surface. Smooth orbital rotation around the bottle start
 15-degree hero angle. Wisps of cold vapor drift from the bottle cap, bokeh circles from distant \
 kitchen pendant lights float in the background. \
 Shot on ARRI Alexa Mini LF, anamorphic 2.39:1 widescreen, extremely shallow depth of field, \
-photorealistic 8K, luxury commercial grade, no text, no watermarks."
+photorealistic 8K, luxury commercial grade, safe for all audiences, no nudity, no violence, no text, no watermarks."
 
 ═══════════════════════════════════════════════
 VOICEOVER RULES
