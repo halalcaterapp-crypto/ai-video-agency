@@ -50,6 +50,7 @@ def run(
     target_audience: str,
     tone: str,
     client_email: str,
+    key_benefits: str = "",
     logo_path: str = None,
     generate_logo: bool = False,
 ) -> dict:
@@ -65,7 +66,7 @@ def run(
     try:
         # -- 1. Storyboarding
         logger.info("=== STEP 1: Storyboarding ===")
-        sb = storyboard.generate_storyboard(product_name, target_audience, tone)
+        sb = storyboard.generate_storyboard(product_name, target_audience, tone, key_benefits)
         result["storyboard"] = sb
 
         sb_path = os.path.join(job_dir, "storyboard.json")

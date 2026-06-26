@@ -105,17 +105,27 @@ STRICT OUTPUT RULES
 6. Output ONLY the JSON. Nothing else."""
 
 
-def generate_storyboard(product_name, target_audience, tone):
+def generate_storyboard(product_name, target_audience, tone, key_benefits=""):
     """
     Call Claude with the director system prompt and client brief.
     Returns the parsed shot-list dict.
     """
     client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
 
+    benefits_line = (
+        f"Key Benefits / What Makes It Unique: {key_benefits}\n"
+        if key_benefits else ""
+    )
+
     user_message = (
         f"Product: {product_name}\n"
         f"Target Audience: {target_audience}\n"
-        f"Tone / Style: {tone}\n\n"
+        f"Tone / Style: {tone}\n"
+        f"{benefits_line}"
+        "\nIMPORTANT: Every shot and every voiceover line must directly connect to this specific "
+        "product and its benefits. Do NOT use generic commercial visuals — make it unmistakably "
+        "about THIS product. The viewer should know exactly what the product is and why they need "
+        "it within the first 5 seconds.\n\n"
         "Generate a complete video shot list for this product. Output ONLY the raw JSON object."
     )
 

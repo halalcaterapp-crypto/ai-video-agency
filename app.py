@@ -44,6 +44,7 @@ def generate():
     target_audience = request.form.get("target_audience", "").strip()
     tone            = request.form.get("tone", "").strip()
     client_email    = request.form.get("client_email", "").strip()
+    key_benefits    = request.form.get("key_benefits", "").strip()
     generate_logo   = request.form.get("generate_logo") == "1"
 
     errors = []
@@ -81,6 +82,7 @@ def generate():
             target_audience=target_audience,
             tone=tone or "professional, cinematic, compelling",
             client_email=client_email,
+            key_benefits=key_benefits,
             logo_path=logo_path,
             generate_logo=generate_logo,
         ),
