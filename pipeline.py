@@ -54,6 +54,7 @@ def run(
     key_benefits: str = "",
     logo_path: str = None,
     generate_logo: bool = False,
+    business_type: str = "product",
 ) -> dict:
     """Execute the complete pipeline for one client submission."""
     job_dir = _make_job_dir(product_name)
@@ -67,7 +68,7 @@ def run(
     try:
         # -- 1. Storyboarding
         logger.info("=== STEP 1: Storyboarding ===")
-        sb = storyboard.generate_storyboard(product_name, target_audience, tone, key_benefits)
+        sb = storyboard.generate_storyboard(product_name, target_audience, tone, key_benefits, business_type)
         result["storyboard"] = sb
 
         sb_path = os.path.join(job_dir, "storyboard.json")

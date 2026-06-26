@@ -45,6 +45,7 @@ def generate():
     tone            = request.form.get("tone", "").strip()
     client_email    = request.form.get("client_email", "").strip()
     key_benefits    = request.form.get("key_benefits", "").strip()
+    business_type   = request.form.get("business_type", "product").strip() or "product"
     generate_logo   = request.form.get("generate_logo") == "1"
 
     errors = []
@@ -60,7 +61,8 @@ def generate():
                                product_name=product_name,
                                target_audience=target_audience,
                                tone=tone,
-                               client_email=client_email)
+                               client_email=client_email,
+                               business_type=business_type)
 
     # Handle optional logo upload
     logo_path = None
@@ -85,6 +87,7 @@ def generate():
             key_benefits=key_benefits,
             logo_path=logo_path,
             generate_logo=generate_logo,
+            business_type=business_type,
         ),
         daemon=True,
     )

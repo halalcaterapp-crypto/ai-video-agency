@@ -13,9 +13,9 @@
       color: #e8e8f0;
       min-height: 100vh;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
-      padding: 24px;
+      padding: 32px 24px;
     }
 
     .card {
@@ -23,7 +23,7 @@
       border: 1px solid #2a2a3e;
       border-radius: 16px;
       width: 100%;
-      max-width: 560px;
+      max-width: 640px;
       padding: 48px 44px;
       box-shadow: 0 24px 80px rgba(0,0,0,0.6);
     }
@@ -63,6 +63,7 @@
     .errors ul { padding-left: 18px; }
     .errors li { margin-top: 4px; }
 
+    /* ── Section Label ── */
     label {
       display: block;
       font-size: 13px;
@@ -79,6 +80,96 @@
       margin-left: 6px;
     }
 
+    /* ── Business Type Grid ── */
+    .section-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #c0c0d0;
+      letter-spacing: 0.3px;
+      margin-bottom: 12px;
+    }
+
+    .biz-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .biz-card {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .biz-card input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .biz-card-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 14px 8px;
+      background: #0d0d18;
+      border: 1.5px solid #2e2e44;
+      border-radius: 10px;
+      text-align: center;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      min-height: 80px;
+    }
+
+    .biz-card:hover .biz-card-inner {
+      border-color: #7c6af7;
+      background: #111124;
+    }
+
+    .biz-card input[type="radio"]:checked + .biz-card-inner {
+      border-color: #7c6af7;
+      background: #1a1636;
+      box-shadow: 0 0 0 3px rgba(124, 106, 247, 0.2);
+    }
+
+    .biz-icon {
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .biz-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #c0c0d0;
+      line-height: 1.3;
+    }
+
+    /* ── Text Inputs ── */
+    input[type="text"],
+    input[type="email"],
+    select,
+    textarea {
+      width: 100%;
+      background: #0d0d18;
+      border: 1px solid #2e2e44;
+      border-radius: 8px;
+      color: #e8e8f0;
+      font-size: 14px;
+      padding: 12px 14px;
+      margin-bottom: 22px;
+      transition: border-color 0.2s;
+      outline: none;
+      font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #7c6af7;
+    }
+    textarea { resize: vertical; min-height: 80px; }
+    select option { background: #13131e; }
+
+    /* ── File Input ── */
     input[type="file"] {
       width: 100%;
       background: #0d0d18;
@@ -93,9 +184,9 @@
     }
     input[type="file"]:hover { border-color: #7c6af7; }
 
-    .logo-section {
-      margin-bottom: 22px;
-    }
+    /* ── Logo Section ── */
+    .logo-section { margin-bottom: 22px; }
+
     .logo-option {
       display: flex;
       align-items: flex-start;
@@ -122,38 +213,12 @@
       color: #e8e8f0;
       margin-bottom: 2px;
     }
-    .logo-option-text span {
-      font-size: 11px;
-      color: #555;
-    }
-    #logo-upload-area {
-      margin-top: 8px;
-    }
+    .logo-option-text span { font-size: 11px; color: #555; }
+
+    #logo-upload-area { margin-top: 8px; }
     #logo-upload-area.hidden { display: none; }
 
-    input[type="text"],
-    input[type="email"],
-    select,
-    textarea {
-      width: 100%;
-      background: #0d0d18;
-      border: 1px solid #2e2e44;
-      border-radius: 8px;
-      color: #e8e8f0;
-      font-size: 14px;
-      padding: 12px 14px;
-      margin-bottom: 22px;
-      transition: border-color 0.2s;
-      outline: none;
-      font-family: inherit;
-    }
-    input:focus, select:focus, textarea:focus {
-      border-color: #7c6af7;
-    }
-    textarea { resize: vertical; min-height: 80px; }
-
-    select option { background: #13131e; }
-
+    /* ── Submit Button ── */
     .btn {
       display: block;
       width: 100%;
@@ -179,6 +244,12 @@
       margin-top: 18px;
       line-height: 1.6;
     }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      .card { padding: 32px 22px; }
+      .biz-grid { grid-template-columns: repeat(2, 1fr); }
+    }
   </style>
 </head>
 <body>
@@ -186,22 +257,153 @@
     <p class="logo">AI Video Studio</p>
     <h1>Get Your AI‑Generated Commercial</h1>
     <p class="subtitle">
-      Fill in your product details below. Our AI will write the script,
+      Fill in the details below. Our AI will write the script,
       generate cinematic visuals, add a professional voiceover, and
       deliver a finished MP4 straight to your inbox — fully automated.
     </p>
 
     {% if errors %}
     <div class="errors">
-      <ul>
-        {% for err in errors %}<li>{{ err }}</li>{% endfor %}
-      </ul>
+      <ul>{% for err in errors %}<li>{{ err }}</li>{% endfor %}</ul>
     </div>
     {% endif %}
 
     <form method="POST" action="/generate" enctype="multipart/form-data">
+
+      <!-- ── STEP 1: Business Type ── -->
+      <div class="section-label">
+        What type of business is this for?
+        <span class="hint">select one — shapes the entire video style</span>
+      </div>
+
+      <div class="biz-grid">
+
+        <label class="biz-card">
+          <input type="radio" name="business_type" value="product"
+            {% if (business_type or 'product') == 'product' %}checked{% endif %}
+            onchange="onBizChange(this.value)" />
+          <div class="biz-card-inner">
+            <span class="biz-icon">📦</span>
+            <span class="biz-label">Physical<br>Product</span>
+          </div>
+        </label>
+
+        <label class="biz-card">
+          <input type="radio" name="business_type" value="medical"
+            {% if business_type == 'medical' %}checked{% endif %}
+            onchange="onBizChange(this.value)" />
+          <div class="biz-card-inner">
+            <span class="biz-icon">🏥</span>
+            <span class="biz-label">Health &amp;<br>Medical</span>
+          </div>
+        </label>
+
+        <label class="biz-card">
+          <input type="radio" name="business_type" value="spa"
+            {% if business_type == 'spa' %}checked{% endif %}
+            onchange="onBizChange(this.value)" />
+          <div class="biz-card-inner">
+            <span class="biz-icon">💆</span>
+            <span class="biz-label">Beauty<br>&amp; Spa</span>
+          </div>
+        </label>
+
+        <label class="biz-card">
+          <input type="radio" name="business_type" value="home_services"
+            {% if business_type == 'home_services' %}checked{% endif %}
+            onchange="onBizChange(this.value)" />
+          <div class="biz-card-inner">
+            <span class="biz-icon">🔧</span>
+            <span class="biz-label">Home<br>Services</span>
+          </div>
+        </label>
+
+        <label class="biz-card">
+          <input type="radio" name="business_type" value="restaurant"
+            {% if business_type == 'restaurant' %}checked{% endif %}
+            onchange="onBizChange(this.value)" />
+          <div class="biz-card-inner">
+            <span class="biz-icon">🍽️</span>
+            <span class="biz-label">Restaurant<br>&amp; Food</span>
+          </div>
+        </label>
+
+        <label class="biz-card">
+          <input type="radio" name="business_type" value="fitness"
+            {% if business_type == 'fitness' %}checked{% endif %}
+            onchange="onBizChange(this.value)" />
+          <div class="biz-card-inner">
+            <span class="biz-icon">💪</span>
+            <span class="biz-label">Fitness<br>&amp; Wellness</span>
+          </div>
+        </label>
+
+        <label class="biz-card">
+          <input type="radio" name="business_type" value="real_estate"
+            {% if business_type == 'real_estate' %}checked{% endif %}
+            onchange="onBizChange(this.value)" />
+          <div class="biz-card-inner">
+            <span class="biz-icon">🏠</span>
+            <span class="biz-label">Real<br>Estate</span>
+          </div>
+        </label>
+
+        <label class="biz-card">
+          <input type="radio" name="business_type" value="professional"
+            {% if business_type == 'professional' %}checked{% endif %}
+            onchange="onBizChange(this.value)" />
+          <div class="biz-card-inner">
+            <span class="biz-icon">💼</span>
+            <span class="biz-label">Professional<br>Services</span>
+          </div>
+        </label>
+
+        <label class="biz-card">
+          <input type="radio" name="business_type" value="automotive"
+            {% if business_type == 'automotive' %}checked{% endif %}
+            onchange="onBizChange(this.value)" />
+          <div class="biz-card-inner">
+            <span class="biz-icon">🚗</span>
+            <span class="biz-label">Automotive</span>
+          </div>
+        </label>
+
+        <label class="biz-card">
+          <input type="radio" name="business_type" value="education"
+            {% if business_type == 'education' %}checked{% endif %}
+            onchange="onBizChange(this.value)" />
+          <div class="biz-card-inner">
+            <span class="biz-icon">🎓</span>
+            <span class="biz-label">Education<br>&amp; Coaching</span>
+          </div>
+        </label>
+
+        <label class="biz-card">
+          <input type="radio" name="business_type" value="retail"
+            {% if business_type == 'retail' %}checked{% endif %}
+            onchange="onBizChange(this.value)" />
+          <div class="biz-card-inner">
+            <span class="biz-icon">🛍️</span>
+            <span class="biz-label">Retail<br>Store</span>
+          </div>
+        </label>
+
+        <label class="biz-card">
+          <input type="radio" name="business_type" value="general"
+            {% if business_type == 'general' %}checked{% endif %}
+            onchange="onBizChange(this.value)" />
+          <div class="biz-card-inner">
+            <span class="biz-icon">🏢</span>
+            <span class="biz-label">General<br>Business</span>
+          </div>
+        </label>
+
+      </div>
+      <!-- end biz-grid -->
+
+      <!-- ── STEP 2: Business / Product Details ── -->
       <label for="product_name">
-        Product / Brand Name
+        Business / Brand Name
         <span class="hint">required</span>
       </label>
       <input
@@ -214,7 +416,7 @@
       />
 
       <label for="key_benefits">
-        Key Benefits &amp; What Makes It Unique
+        What makes you unique? Key benefits &amp; differentiators
         <span class="hint">highly recommended — the more detail, the better your video</span>
       </label>
       <textarea
@@ -236,24 +438,12 @@
 
       <label for="tone">Video Tone / Style</label>
       <select id="tone" name="tone">
-        <option value="calm, premium, aspirational" {% if tone == 'calm, premium, aspirational' %}selected{% endif %}>
-          Calm &amp; Premium
-        </option>
-        <option value="energetic, bold, fast-paced" {% if tone == 'energetic, bold, fast-paced' %}selected{% endif %}>
-          Energetic &amp; Bold
-        </option>
-        <option value="warm, friendly, relatable" {% if tone == 'warm, friendly, relatable' %}selected{% endif %}>
-          Warm &amp; Friendly
-        </option>
-        <option value="luxurious, cinematic, high-end" {% if tone == 'luxurious, cinematic, high-end' %}selected{% endif %}>
-          Luxurious &amp; Cinematic
-        </option>
-        <option value="informative, trustworthy, professional" {% if tone == 'informative, trustworthy, professional' %}selected{% endif %}>
-          Informative &amp; Professional
-        </option>
-        <option value="playful, fun, youthful" {% if tone == 'playful, fun, youthful' %}selected{% endif %}>
-          Playful &amp; Fun
-        </option>
+        <option value="calm, premium, aspirational" {% if tone == 'calm, premium, aspirational' %}selected{% endif %}>Calm &amp; Premium</option>
+        <option value="energetic, bold, fast-paced" {% if tone == 'energetic, bold, fast-paced' %}selected{% endif %}>Energetic &amp; Bold</option>
+        <option value="warm, friendly, relatable" {% if tone == 'warm, friendly, relatable' %}selected{% endif %}>Warm &amp; Friendly</option>
+        <option value="luxurious, cinematic, high-end" {% if tone == 'luxurious, cinematic, high-end' %}selected{% endif %}>Luxurious &amp; Cinematic</option>
+        <option value="informative, trustworthy, professional" {% if tone == 'informative, trustworthy, professional' %}selected{% endif %}>Informative &amp; Professional</option>
+        <option value="playful, fun, youthful" {% if tone == 'playful, fun, youthful' %}selected{% endif %}>Playful &amp; Fun</option>
       </select>
 
       <label for="client_email">
@@ -269,6 +459,7 @@
         required
       />
 
+      <!-- ── Logo ── -->
       <label>Logo <span class="hint">optional — appears in bottom-right corner</span></label>
       <div class="logo-section">
         <label class="logo-option">
@@ -301,20 +492,97 @@
       <button type="submit" class="btn">🎬 Generate My Commercial</button>
     </form>
 
-    <script>
-      function handleLogoChoice(val) {
-        document.getElementById('logo-upload-area').classList.toggle('hidden', val !== 'upload');
-        document.getElementById('generate_logo_flag').value = val === 'generate' ? '1' : '0';
-        if (val !== 'upload') {
-          document.getElementById('logo').value = '';
-        }
-      }
-    </script>
-
     <p class="disclaimer">
       Production typically takes 5–15 minutes depending on queue depth.<br />
       You'll receive a ready-to-publish MP4 via email when it's done.
     </p>
   </div>
+
+  <script>
+    // ── Per-business-type placeholder hints ──
+    var BIZ_HINTS = {
+      product: {
+        name:     'e.g. ProSleep Pillow',
+        benefits: 'e.g. All-natural materials, 3x cooler than memory foam, eco-certified packaging, loved by 50,000+ customers',
+        audience: 'e.g. Busy professionals aged 30–45 who struggle with sleep'
+      },
+      medical: {
+        name:     'e.g. Sunshine Dental & Orthodontics',
+        benefits: 'e.g. No-wait appointments, in-network with 50+ insurance plans, gentle care for anxious patients, 20+ years experience',
+        audience: 'e.g. Families and adults in the local area looking for a trusted dentist they can count on'
+      },
+      spa: {
+        name:     'e.g. Lumière Beauty Studio',
+        benefits: 'e.g. Signature 90-min facials, organic botanicals only, private treatment suites, results-driven skin therapy',
+        audience: 'e.g. Women aged 28–50 who want to look and feel their best and treat themselves to real self-care'
+      },
+      home_services: {
+        name:     'e.g. TrustPro Plumbing & HVAC',
+        benefits: 'e.g. Same-day emergency service, licensed & insured, upfront flat-rate pricing, 5-star Google reviews',
+        audience: 'e.g. Homeowners in the metro area dealing with plumbing, HVAC, or electrical issues who need fast reliable help'
+      },
+      restaurant: {
+        name:     'e.g. Casa Fuego Modern Mexican Kitchen',
+        benefits: 'e.g. Scratch-made sauces daily, locally sourced produce, wood-fired meats, voted Best New Restaurant 2024',
+        audience: 'e.g. Foodies and families in the area looking for an authentic, exciting dining experience'
+      },
+      fitness: {
+        name:     'e.g. Peak Performance Gym & Training',
+        benefits: 'e.g. Expert personal trainers, state-of-the-art equipment, small-group classes, no-contract memberships',
+        audience: 'e.g. Adults aged 25–45 who want to get fit, lose weight, or level up their athletic performance'
+      },
+      real_estate: {
+        name:     'e.g. Harper Luxury Properties',
+        benefits: 'e.g. Specialist in luxury waterfront homes, average 7% above asking, sold 200+ homes this year, concierge service',
+        audience: 'e.g. High-income buyers and sellers looking for a trusted expert in the luxury property market'
+      },
+      professional: {
+        name:     'e.g. Meridian Law Group',
+        benefits: 'e.g. 25 years in business law, 98% client success rate, free initial consultation, boutique firm with big-firm results',
+        audience: 'e.g. Small business owners and entrepreneurs who need expert legal counsel they can trust'
+      },
+      automotive: {
+        name:     'e.g. Prestige Auto Gallery',
+        benefits: 'e.g. Pre-certified inventory, 7-day return policy, on-site financing, certified master technicians on staff',
+        audience: 'e.g. Car buyers and enthusiasts in the region looking for quality vehicles at fair prices'
+      },
+      education: {
+        name:     'e.g. Elite SAT & College Prep Academy',
+        benefits: 'e.g. Average 250-point SAT improvement, 100% college acceptance rate, live tutors + on-demand lessons, free trial class',
+        audience: 'e.g. High school students and parents preparing for college admissions who want real results'
+      },
+      retail: {
+        name:     'e.g. Maple & Oak Home Goods',
+        benefits: 'e.g. Curated from independent designers, sustainable materials, free gift wrapping, 30-day exchanges',
+        audience: 'e.g. Style-conscious shoppers who want unique, quality home décor that tells a story'
+      },
+      general: {
+        name:     'e.g. Sunrise Staffing Solutions',
+        benefits: 'e.g. 10+ years serving local businesses, 48-hour placements, specialized in healthcare & tech staffing',
+        audience: 'e.g. Local business owners and managers who need reliable staffing solutions quickly'
+      }
+    };
+
+    function onBizChange(val) {
+      var hints = BIZ_HINTS[val] || BIZ_HINTS['general'];
+      document.getElementById('product_name').placeholder  = hints.name;
+      document.getElementById('key_benefits').placeholder  = hints.benefits;
+      document.getElementById('target_audience').placeholder = hints.audience;
+    }
+
+    function handleLogoChoice(val) {
+      document.getElementById('logo-upload-area').classList.toggle('hidden', val !== 'upload');
+      document.getElementById('generate_logo_flag').value = val === 'generate' ? '1' : '0';
+      if (val !== 'upload') {
+        document.getElementById('logo').value = '';
+      }
+    }
+
+    // Set placeholders on initial load based on which card is checked
+    (function() {
+      var checked = document.querySelector('input[name="business_type"]:checked');
+      if (checked) onBizChange(checked.value);
+    })();
+  </script>
 </body>
 </html>
