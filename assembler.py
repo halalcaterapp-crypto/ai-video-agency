@@ -139,22 +139,38 @@ def assemble_video(enriched_shots, voiceover_path, output_path, logo_path=None, 
 
     # Step 5 (optional): Overlay logo in bottom-right corner
     if logo_path and os.path.exists(logo_path):
+        # Validate logo file is non-empty before attempting overlay
+        logo_size = os.path.getsize(logo_path)
+        if logo_size < 100:
+            logger.warning("Logo file too small (%d bytes) — skipping overlay", logo_size)
+            logo_path = None
+
+    if logo_path and os.path.exists(logo_path):
         logger.info("Overlaying logo '%s' ...", logo_path)
-        _ffmpeg([
-            "-i", audio_mixed,
-            "-i", logo_path,
-            "-filter_complex",
-            # Scale logo to 200px wide (keep aspect ratio), set 75% opacity, overlay bottom-right
-            "[1:v]scale=200:-1,format=rgba,colorchannelmixer=aa=0.75[logo];"
-            "[0:v][logo]overlay=W-w-20:H-h-20",
-            "-c:a", "copy",
-            output_path,
-        ], "logo overlay")
         try:
-            os.remove(audio_mixed)
-        except Exception:
-            pass
-        logger.info("Logo overlaid -> %s", output_path)
+            _ffmpeg([
+                "-i", audio_mixed,
+                "-i", logo_path,
+                "-filter_complex",
+                # Scale logo to 200px wide (keep aspect ratio), set 75% opacity, overlay bottom-right
+                "[1:v]scale=200:-1,format=rgba,colorchannelmixer=aa=0.75[logo];"
+                "[0:v][logo]overlay=W-w-20:H-h-20",
+                "-c:a", "copy",
+                output_path,
+            ], "logo overlay")
+            try:
+                os.remove(audio_mixed)
+            except Exception:
+                pass
+            logger.info("Logo overlaid -> %s", output_path)
+        except Exception as logo_err:
+            # Logo overlay failed — rename audio_mixed to output_path and continue without logo
+            logger.warning("Logo overlay failed (%s) — delivering video without logo", logo_err)
+            try:
+                import shutil
+                shutil.move(audio_mixed, output_path)
+            except Exception:
+                pass
     else:
         if logo_path:
             logger.warning("Logo path not found, skipping overlay: %s", logo_path)
