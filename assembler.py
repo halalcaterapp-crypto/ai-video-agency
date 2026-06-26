@@ -6,6 +6,7 @@ ffmpeg streams each clip without loading everything into RAM at once.
 
 import logging
 import os
+import re
 import subprocess
 from pathlib import Path
 import imageio_ffmpeg
@@ -31,7 +32,19 @@ def _ffmpeg(args, desc="ffmpeg"):
     return result
 
 
-def assemble_video(enriched_shots, voiceover_path, output_path, logo_path=None):
+def _get_duration(path: str) -> float:
+    """Return the duration of a media file in seconds using ffmpeg."""
+    result = subprocess.run(
+        [_FFMPEG_EXE, "-i", path],
+        capture_output=True, text=True,
+    )
+    m = re.search(r"Duration:\s*(\d+):(\d+):(\d+\.\d+)", result.stderr)
+    if m:
+        return int(m.group(1)) * 3600 + int(m.group(2)) * 60 + float(m.group(3))
+    return 0.0
+
+
+def assemble_video(enriched_shots, voiceover_path, output_path, logo_path=None, music_path=None):
     """
     Combine all clips + audio into the final MP4 using ffmpeg subprocess.
 
@@ -40,6 +53,7 @@ def assemble_video(enriched_shots, voiceover_path, output_path, logo_path=None):
         voiceover_path: Path to the TTS MP3 file.
         output_path:    Where to write the final MP4.
         logo_path:      Optional path to a PNG/JPG logo; overlaid in the bottom-right corner.
+        music_path:     Optional path to a background music MP3; mixed under voiceover at low volume.
 
     Returns:
         output_path on success.
@@ -89,17 +103,38 @@ def assemble_video(enriched_shots, voiceover_path, output_path, logo_path=None):
     ], "concat")
     logger.info("Clips concatenated -> %s", concat_mp4)
 
-    # Step 4: Mix voiceover audio
-    logger.info("Mixing voiceover from '%s' ...", voiceover_path)
-    # If no logo, write directly to output_path; otherwise write to a temp file first
+    # Step 4: Mix voiceover + optional background music
+    logger.info("Mixing audio from '%s' ...", voiceover_path)
+    # Write to a temp file if logo overlay follows; otherwise write directly to output_path
     audio_mixed = output_path if not logo_path else os.path.join(job_dir, "audio_mixed.mp4")
-    _ffmpeg([
-        "-i", concat_mp4,
-        "-i", voiceover_path,
-        "-c:v", "copy",
-        "-c:a", "aac", "-b:a", "192k",
-        audio_mixed,
-    ], "audio mix")
+
+    if music_path and os.path.exists(music_path):
+        # Get video duration so we can trim looped music exactly to video length
+        video_dur = _get_duration(concat_mp4)
+        logger.info("Mixing with background music (video=%.1fs, music=%s)", video_dur, music_path)
+        _ffmpeg([
+            "-i", concat_mp4,
+            "-i", voiceover_path,
+            "-stream_loop", "-1", "-i", music_path,   # loop music infinitely
+            "-filter_complex",
+            # Music at 12% volume; mix voice + music; trim to exact video length
+            "[2:a]volume=0.12[bg];"
+            "[1:a][bg]amix=inputs=2:duration=longest:dropout_transition=4[amixed];"
+            f"[amixed]atrim=end={video_dur:.3f},asetpts=PTS-STARTPTS[audio]",
+            "-c:v", "copy",
+            "-map", "0:v",
+            "-map", "[audio]",
+            "-c:a", "aac", "-b:a", "192k",
+            audio_mixed,
+        ], "audio mix + music")
+    else:
+        _ffmpeg([
+            "-i", concat_mp4,
+            "-i", voiceover_path,
+            "-c:v", "copy",
+            "-c:a", "aac", "-b:a", "192k",
+            audio_mixed,
+        ], "audio mix")
     logger.info("Audio mixed -> %s", audio_mixed)
 
     # Step 5 (optional): Overlay logo in bottom-right corner

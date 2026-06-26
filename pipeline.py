@@ -25,6 +25,7 @@ import video_gen
 import assembler
 import email_sender
 import logo_gen
+import music
 
 logging.basicConfig(
     level=logging.INFO,
@@ -88,7 +89,11 @@ def run(
         if not enriched_shots:
             raise RuntimeError(f"generate_all_clips returned empty/None: {enriched_shots!r}")
 
-        # -- 3.5. Logo (optional)
+        # -- 3.5. Background music
+        logger.info("=== STEP 3.5a: Fetching background music ===")
+        music_path = music.get_background_music(tone)
+
+        # -- 3.5b. Logo (optional)
         if generate_logo and not logo_path:
             logger.info("=== STEP 3.5: Generating logo with DALL-E ===")
             try:
@@ -104,7 +109,10 @@ def run(
         ).strip().replace(" ", "_")[:50]
         final_path = os.path.join(job_dir, f"{safe_title}_final.mp4")
 
-        assembler.assemble_video(enriched_shots, voiceover_path, final_path, logo_path=logo_path)
+        assembler.assemble_video(
+            enriched_shots, voiceover_path, final_path,
+            logo_path=logo_path, music_path=music_path,
+        )
         result["video_path"] = final_path
 
         # -- 5. Email Delivery
