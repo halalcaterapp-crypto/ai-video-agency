@@ -41,13 +41,13 @@ Shot 5 — BRAND CLOSE: Aspirational closing shot. Product prominent. Leaves the
         "label": "Health & Medical",
         "subject": "Practice / Service",
         "shots": """\
-Shot 1 — WELCOMING SPACE: Clean, modern, calming medical/clinic environment. Warm lighting, professional but approachable.
-Shot 2 — EXPERT IN ACTION: Doctor, dentist, or specialist performing their work — confident, skilled, caring expression.
-Shot 3 — PATIENT EXPERIENCE: Patient looking visibly comfortable, relieved, or mid-positive-experience. Human and emotional.
-Shot 4 — PRECISION DETAIL: Close-up of professional hands, specialized equipment, or a treatment being carefully delivered.
-Shot 5 — POSITIVE OUTCOME: Patient leaving with a smile, a healed result shown, or a trust-building moment with staff.""",
-        "voiceover": "Empathetic and authoritative. Open with the patient's pain point or fear. Show expertise and care. Close with relief, confidence, and a clear CTA (call today, book online).",
-        "prominence": "The medical professional must appear confident and caring in shots 2 and 5. The clinic environment must feel clean and modern throughout.",
+Shot 1 — CLINIC ESTABLISH: Pristine, modern medical office exterior or welcoming reception — clean, bright, professional. No people. Architecture and space only.
+Shot 2 — PRIMARY SERVICE VISUAL: The hero visual for the clinic's main service. If hypertension/BP management: a sleek blood pressure monitor with crisp digital readout. If diabetes: a modern glucometer with test strips and lancet device arranged beautifully. If cardiology: a glowing EKG waveform or stethoscope on a clean surface. If dental: polished dental instruments laid out precisely. Match the visual to what the key benefits describe — medical equipment only, no people.
+Shot 3 — DIAGNOSTIC PRECISION: Close-up of specialized medical equipment in detail — gloved hands operating a device, a diagnostic screen showing clean data, a precisely arranged set of medical tools. Clinical lighting, hyper-detailed, no faces.
+Shot 4 — HEALTH OUTCOME VISUAL: A symbolic representation of the health result — a heart rate monitor showing healthy rhythm, a glucometer reading a perfect number, a blood pressure cuff showing normal readings, supplement bottles or prescription packaging in clean arrangement. Abstract and aspirational.
+Shot 5 — BRAND CLOSE: Wide shot of the immaculate clinic interior or exterior at golden hour — polished floors, modern equipment visible, the promise of excellent care conveyed through environment alone. Aspirational and trustworthy.""",
+        "voiceover": "Empathetic and authoritative. Open with the patient's health concern. Establish the clinic's expertise and specific services. Name the conditions managed (BP, diabetes, cholesterol, etc.). Close with confidence and a clear CTA — call today, book your appointment.",
+        "prominence": "Medical equipment and the clinic environment are the visual heroes throughout. No full human figures — at most gloved hands operating equipment. Every shot must feel clinical, precise, and trustworthy.",
     },
 
     "spa": {
@@ -73,7 +73,7 @@ Shot 3 — EXPERT AT WORK: Close and dynamic — professional hands working with
 Shot 4 — THE FIX COMPLETE: The repaired/installed result in perfect condition — clean, finished, professional-grade workmanship detail.
 Shot 5 — HOMEOWNER RELIEF: Happy homeowner in their now-resolved space — bright, warm, problem gone. Handshake or thumbs-up moment.""",
         "voiceover": "Reliable, direct, trustworthy. Open with the stress of the problem. Establish speed, expertise, and reliability. Close with a bold guarantee or fast-response CTA.",
-        "prominence": "The uniformed professional must appear competent and clean in shots 2, 3, and 5. The resolution and craftsmanship must be clear in shot 4.",
+        "prominence": "Focus on tools, trucks, and finished work — not faces. Close-up of professional hands and equipment is preferred over full-body human shots. The craftsmanship and resolution must be unmistakable in shot 4.",
     },
 
     "restaurant": {
@@ -229,7 +229,7 @@ separating the bottle from the black background, warm amber fill catching conden
 glistening on the glass surface. Smooth orbital rotation around the bottle from a low 15-degree hero angle. \
 Wisps of cold vapor drift from the bottle cap, bokeh circles from kitchen pendant lights float in background. \
 Shot on ARRI Alexa Mini LF, anamorphic 2.39:1 widescreen, extremely shallow depth of field, \
-photorealistic 8K, luxury commercial grade, safe for all audiences, no nudity, no violence, no text, no watermarks."
+photorealistic 8K, luxury commercial grade, safe for all audiences, no nudity, no violence, no text, no watermarks, no readable text on products, no brand labels on packaging, no writing on bottles or containers."
 
 ═══════════════════════════════════════════════
 STRICT OUTPUT RULES

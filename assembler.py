@@ -109,17 +109,26 @@ def assemble_video(enriched_shots, voiceover_path, output_path, logo_path=None, 
     audio_mixed = output_path if not logo_path else os.path.join(job_dir, "audio_mixed.mp4")
 
     if music_path and os.path.exists(music_path):
-        # Get video duration so we can trim looped music exactly to video length
+        # Get durations for smart music volume automation
         video_dur = _get_duration(concat_mp4)
-        logger.info("Mixing with background music (video=%.1fs, music=%s)", video_dur, music_path)
+        voice_dur = _get_duration(voiceover_path)
+        ramp_end = voice_dur + 1.0  # 1-second ramp from 12% to 35% after VO ends
+        logger.info(
+            "Mixing with background music (video=%.1fs, voice=%.1fs, music=%s)",
+            video_dur, voice_dur, music_path,
+        )
+        # Volume expression: 12% under voiceover, ramps to 35% over 1s after VO ends
+        vol_expr = (
+            f"if(lt(t,{voice_dur:.3f}),0.12,"
+            f"if(lt(t,{ramp_end:.3f}),0.12+((t-{voice_dur:.3f})*0.23),0.35))"
+        )
         _ffmpeg([
             "-i", concat_mp4,
             "-i", voiceover_path,
-            "-stream_loop", "-1", "-i", music_path,   # loop music infinitely
+            "-stream_loop", "-1", "-i", music_path,
             "-filter_complex",
-            # Music at 12% volume; mix voice + music; trim to exact video length
-            "[2:a]volume=0.12[bg];"
-            "[1:a][bg]amix=inputs=2:duration=longest:dropout_transition=4[amixed];"
+            f"[2:a]volume='{vol_expr}':eval=frame[bg];"
+            "[1:a][bg]amix=inputs=2:duration=longest:dropout_transition=2[amixed];"
             f"[amixed]atrim=end={video_dur:.3f},asetpts=PTS-STARTPTS[audio]",
             "-c:v", "copy",
             "-map", "0:v",
@@ -152,9 +161,12 @@ def assemble_video(enriched_shots, voiceover_path, output_path, logo_path=None, 
                 "-i", audio_mixed,
                 "-i", logo_path,
                 "-filter_complex",
-                # Scale logo to 200px wide (keep aspect ratio), set 75% opacity, overlay bottom-right
+                # Scale logo, convert to RGBA, set 75% opacity, overlay bottom-right corner
                 "[1:v]scale=200:-1,format=rgba,colorchannelmixer=aa=0.75[logo];"
-                "[0:v][logo]overlay=W-w-20:H-h-20",
+                "[0:v][logo]overlay=W-w-20:H-h-20:format=auto[vout]",
+                "-map", "[vout]",
+                "-map", "0:a?",
+                "-c:v", "libx264", "-preset", "fast", "-crf", "23",
                 "-c:a", "copy",
                 output_path,
             ], "logo overlay")
