@@ -7,6 +7,7 @@ ffmpeg streams each clip without loading everything into RAM at once.
 import logging
 import os
 import re
+import shutil
 import subprocess
 from pathlib import Path
 import imageio_ffmpeg
@@ -105,8 +106,18 @@ def assemble_video(enriched_shots, voiceover_path, output_path, logo_path=None, 
 
     # Step 4: Mix voiceover + optional background music
     logger.info("Mixing audio from '%s' ...", voiceover_path)
-    # Write to a temp file if logo overlay follows; otherwise write directly to output_path
-    audio_mixed = output_path if not logo_path else os.path.join(job_dir, "audio_mixed.mp4")
+    # Validate logo BEFORE deciding on temp vs final path so we don't orphan audio_mixed
+    if logo_path and os.path.exists(logo_path):
+        logo_size = os.path.getsize(logo_path)
+        if logo_size < 100:
+            logger.warning("Logo file too small (%d bytes) — skipping overlay", logo_size)
+            logo_path = None
+    elif logo_path:
+        logger.warning("Logo path not found — skipping overlay: %s", logo_path)
+        logo_path = None
+
+    # Only write to temp file if we have a confirmed valid logo to overlay
+    audio_mixed = os.path.join(job_dir, "audio_mixed.mp4") if logo_path else output_path
 
     if music_path and os.path.exists(music_path):
         # Get durations for smart music volume automation
@@ -140,6 +151,8 @@ def assemble_video(enriched_shots, voiceover_path, output_path, logo_path=None, 
         _ffmpeg([
             "-i", concat_mp4,
             "-i", voiceover_path,
+            "-map", "0:v",
+            "-map", "1:a",
             "-c:v", "copy",
             "-c:a", "aac", "-b:a", "192k",
             audio_mixed,
@@ -147,23 +160,18 @@ def assemble_video(enriched_shots, voiceover_path, output_path, logo_path=None, 
     logger.info("Audio mixed -> %s", audio_mixed)
 
     # Step 5 (optional): Overlay logo in bottom-right corner
-    if logo_path and os.path.exists(logo_path):
-        # Validate logo file is non-empty before attempting overlay
-        logo_size = os.path.getsize(logo_path)
-        if logo_size < 100:
-            logger.warning("Logo file too small (%d bytes) — skipping overlay", logo_size)
-            logo_path = None
-
-    if logo_path and os.path.exists(logo_path):
+    if logo_path:
         logger.info("Overlaying logo '%s' ...", logo_path)
         try:
             _ffmpeg([
                 "-i", audio_mixed,
                 "-i", logo_path,
                 "-filter_complex",
-                # Scale logo, convert to RGBA, set 75% opacity, overlay bottom-right corner
-                "[1:v]scale=200:-1,format=rgba,colorchannelmixer=aa=0.75[logo];"
-                "[0:v][logo]overlay=W-w-20:H-h-20:format=auto[vout]",
+                # Scale logo, set 80% opacity, place at top-center AND bottom-right
+                "[1:v]scale=180:-1,format=rgba,colorchannelmixer=aa=0.80[logo];"
+                "[logo]split=2[logo_top][logo_bot];"
+                "[0:v][logo_top]overlay=(W-w)/2:20:format=auto[tmp];"
+                "[tmp][logo_bot]overlay=W-w-20:H-h-20:format=auto[vout]",
                 "-map", "[vout]",
                 "-map", "0:a?",
                 "-c:v", "libx264", "-preset", "fast", "-crf", "23",
@@ -179,7 +187,6 @@ def assemble_video(enriched_shots, voiceover_path, output_path, logo_path=None, 
             # Logo overlay failed — rename audio_mixed to output_path and continue without logo
             logger.warning("Logo overlay failed (%s) — delivering video without logo", logo_err)
             try:
-                import shutil
                 shutil.move(audio_mixed, output_path)
             except Exception:
                 pass
