@@ -159,40 +159,57 @@ def assemble_video(enriched_shots, voiceover_path, output_path, logo_path=None, 
         ], "audio mix")
     logger.info("Audio mixed -> %s", audio_mixed)
 
-    # Step 5 (optional): Overlay logo in bottom-right corner
+    # Step 5 (optional): Overlay logo — two separate passes (top-center then bottom-right)
+    # Two-pass avoids the filter_complex split issue where ffmpeg consumes a single-frame
+    # image stream after the first overlay, leaving the second overlay with no input.
     if logo_path:
-        logger.info("Overlaying logo '%s' ...", logo_path)
+        logger.info("Overlaying logo '%s' (two-pass) ...", logo_path)
+        logo_pass1 = os.path.join(job_dir, "logo_pass1.mp4")
         try:
+            # Pass 1: top-center
             _ffmpeg([
                 "-i", audio_mixed,
                 "-i", logo_path,
                 "-filter_complex",
-                # Scale logo, set 80% opacity, place at top-center AND bottom-right
-                "[1:v]scale=180:-1,format=rgba,colorchannelmixer=aa=0.80[logo];"
-                "[logo]split=2[logo_top][logo_bot];"
-                "[0:v][logo_top]overlay=(W-w)/2:20:format=auto[tmp];"
-                "[tmp][logo_bot]overlay=W-w-20:H-h-20:format=auto[vout]",
+                "[1:v]scale=180:-1,format=rgba,colorchannelmixer=aa=0.85[logo];"
+                "[0:v][logo]overlay=(W-w)/2:20,format=yuv420p[vout]",
+                "-map", "[vout]",
+                "-map", "0:a?",
+                "-c:v", "libx264", "-preset", "fast", "-crf", "23",
+                "-c:a", "copy",
+                logo_pass1,
+            ], "logo overlay top-center")
+
+            # Pass 2: bottom-right
+            _ffmpeg([
+                "-i", logo_pass1,
+                "-i", logo_path,
+                "-filter_complex",
+                "[1:v]scale=180:-1,format=rgba,colorchannelmixer=aa=0.85[logo];"
+                "[0:v][logo]overlay=W-w-20:H-h-20,format=yuv420p[vout]",
                 "-map", "[vout]",
                 "-map", "0:a?",
                 "-c:v", "libx264", "-preset", "fast", "-crf", "23",
                 "-c:a", "copy",
                 output_path,
-            ], "logo overlay")
+            ], "logo overlay bottom-right")
+
+            for f in [audio_mixed, logo_pass1]:
+                try:
+                    os.remove(f)
+                except Exception:
+                    pass
+            logger.info("Logo overlaid (top-center + bottom-right) -> %s", output_path)
+        except Exception as logo_err:
+            logger.error("Logo overlay failed (%s) — delivering without logo", logo_err)
             try:
-                os.remove(audio_mixed)
+                os.remove(logo_pass1)
             except Exception:
                 pass
-            logger.info("Logo overlaid -> %s", output_path)
-        except Exception as logo_err:
-            # Logo overlay failed — rename audio_mixed to output_path and continue without logo
-            logger.warning("Logo overlay failed (%s) — delivering video without logo", logo_err)
             try:
                 shutil.move(audio_mixed, output_path)
             except Exception:
                 pass
-    else:
-        if logo_path:
-            logger.warning("Logo path not found, skipping overlay: %s", logo_path)
 
     logger.info("Assembly complete: %s", output_path)
 
