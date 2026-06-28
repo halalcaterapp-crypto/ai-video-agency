@@ -54,130 +54,130 @@ Shot 5 — BRAND CLOSE: Wide shot of the immaculate clinic interior or exterior 
         "label": "Beauty & Spa",
         "subject": "Spa / Salon Service",
         "shots": """\
-Shot 1 — SANCTUARY REVEAL: Luxurious, serene spa or salon interior. Soft lighting, clean lines, instantly relaxing atmosphere.
-Shot 2 — SERVICE IN PROGRESS: Skilled professional performing a treatment — massage, facial, styling — with relaxed, glowing client.
-Shot 3 — SENSORY DETAIL: Extreme close-up of a product or tool being used — serum dripping, steam rising, brush stroking.
-Shot 4 — TRANSFORMATION MOMENT: Client's glowing skin, perfect hair, or expression of pure bliss and relaxation.
-Shot 5 — BRAND CLOSE: Serene closing — candles, flowers, the space in perfect light — or radiant client with quiet confidence.""",
+Shot 1 — SANCTUARY REVEAL: Luxurious spa or salon interior — soft lighting, pristine treatment table, candles, fresh flowers, calming atmosphere. No people.
+Shot 2 — HERO PRODUCT / TOOL: The signature service product or tool as the visual star — a serum bottle with golden liquid dripping from the dropper, a jade roller on marble, hot stone arrangement, professional hair tools gleaming under studio light. Close and beautiful.
+Shot 3 — SENSORY DETAIL: Extreme close-up of a treatment material — thick cream swirling, essential oil drops hitting water in slow motion, steam rising from a warm towel, brush strokes of a face mask, bubbles in a foot bath. No faces.
+Shot 4 — RESULTS VISUAL: A close-up of radiant, glowing skin texture, smooth hair reflecting light, perfectly manicured nails, or a serene before-and-after skin close-up. The result, not the process.
+Shot 5 — BRAND CLOSE: The full spa environment in its most beautiful state — products beautifully arranged, candles glowing, clean surfaces, an invitation to escape. Aspirational and peaceful.""",
         "voiceover": "Indulgent, sensory, aspirational. Paint a picture of escape and transformation. Speak to the stress they carry and the peace they'll find. Close with an inviting, gentle CTA.",
-        "prominence": "The service and its results must be visible in shots 2, 3, and 4. The environment must feel luxurious and immaculate throughout.",
+        "prominence": "Products, tools, and results are the visual heroes throughout. No full human figures — at most gloved hands applying a treatment. Environment must feel luxurious and immaculate in every shot.",
     },
 
     "home_services": {
         "label": "Home Services",
         "subject": "Service / Company",
         "shots": """\
-Shot 1 — THE PROBLEM: A realistic home scene hinting at the issue — a leaking pipe, dark circuit panel, broken HVAC — subtle stress in the environment.
-Shot 2 — PROFESSIONAL ARRIVAL: Uniformed technician walking confidently toward the camera or door, branded truck visible behind them.
-Shot 3 — EXPERT AT WORK: Close and dynamic — professional hands working with precision, tools in use, focused and competent.
-Shot 4 — THE FIX COMPLETE: The repaired/installed result in perfect condition — clean, finished, professional-grade workmanship detail.
-Shot 5 — HOMEOWNER RELIEF: Happy homeowner in their now-resolved space — bright, warm, problem gone. Handshake or thumbs-up moment.""",
-        "voiceover": "Reliable, direct, trustworthy. Open with the stress of the problem. Establish speed, expertise, and reliability. Close with a bold guarantee or fast-response CTA.",
-        "prominence": "Focus on tools, trucks, and finished work — not faces. Close-up of professional hands and equipment is preferred over full-body human shots. The craftsmanship and resolution must be unmistakable in shot 4.",
+Shot 1 — THE PROBLEM VISUAL: A close-up of the issue itself — a dripping pipe joint with water beads, a sparking electrical panel with loose wires, a cracked HVAC unit, a broken roof tile in the rain. No people. The problem is the story.
+Shot 2 — HERO TOOLS: The signature tools of the trade arranged or in action — a gleaming pipe wrench gripping copper pipe, a voltage tester lighting up on a breaker panel, HVAC gauges connected to a unit, roofing nail gun on fresh shingles. Professional grade, cinematic lighting.
+Shot 3 — CRAFTSMANSHIP IN ACTION: Gloved or bare hands only — no faces — working with precision. Soldering a clean copper joint, wiring a panel with neat bundled cables, tightening a fitting, sealing a roof seam with perfect technique.
+Shot 4 — THE FINISHED RESULT: The completed work in perfect condition — a gleaming new pipe connection with no drips, a clean organized electrical panel with labeled breakers, a brand new HVAC unit humming outside, a pristine roof line. Workmanship as the hero.
+Shot 5 — BRAND / TRUCK CLOSE: The company's service truck parked cleanly, logo visible, tools organized in the truck bed — or a wide shot of the repaired home exterior looking perfect. Reliability and professionalism through equipment and results, not people.""",
+        "voiceover": "Reliable, direct, trustworthy. Open with the stress of the problem. Establish speed, expertise, and reliability. Name the specific service. Close with a bold guarantee or fast-response CTA.",
+        "prominence": "Tools, equipment, and finished work are the undisputed visual heroes. No faces — only hands when needed for context. Every shot must communicate expert craftsmanship through the quality of the work shown.",
     },
 
     "restaurant": {
         "label": "Restaurant & Food",
         "subject": "Restaurant / Food Business",
         "shots": """\
-Shot 1 — AMBIANCE ESTABLISH: The restaurant's atmosphere — warm lighting, beautiful table settings, the energy of the space at golden hour.
-Shot 2 — SIGNATURE DISH HERO: The most stunning dish on the menu, plated to perfection. This is the star. Make it mouthwatering.
-Shot 3 — KITCHEN IN ACTION: Chefs at work — flames, precision plating, fresh ingredients being prepared with passion and skill.
-Shot 4 — SENSORY DETAIL: Extreme close-up — steam rising from a dish, sauce being poured, a perfect cross-section, glistening textures.
-Shot 5 — GUEST EXPERIENCE: Happy diners sharing a meal, laughing, savoring — or a final beauty shot of the dish being served tableside.""",
-        "voiceover": "Sensory and inviting. Make the viewer taste it through words. Speak to the experience, not just the food. Close with a warm invitation to come in or order now.",
-        "prominence": "The food must be the visual hero in shots 2 and 4. The restaurant atmosphere must feel warm and inviting throughout.",
+Shot 1 — AMBIANCE ESTABLISH: The restaurant at its most beautiful — warm lighting, perfect table settings, candles, flowers, the space empty and inviting at golden hour. Architecture and atmosphere only.
+Shot 2 — SIGNATURE DISH HERO: The most stunning dish plated to perfection, center frame, steam rising. This is the undeniable star. No people — just the food in all its glory.
+Shot 3 — KITCHEN IN ACTION: The cooking process as cinematic art — flames leaping in a pan, sauce being ladle-poured over a dish, fresh herbs being chopped, pasta being tossed, bread coming out of a brick oven. Hands and food only, no faces.
+Shot 4 — SENSORY CLOSE-UP: Extreme close-up — a fork cutting into a perfectly seared steak revealing the pink center, sauce drizzled in slow motion, cheese pull, steam rising from a bowl, garnish being placed with tweezers. Pure food porn.
+Shot 5 — FINAL PRESENTATION: The hero dish or a spread of signature items in perfect restaurant lighting — a wide beauty shot that makes the viewer immediately want to order.""",
+        "voiceover": "Sensory and inviting. Make the viewer taste it through words. Speak to flavors, freshness, and the craft. Close with a warm invitation to come in or order now.",
+        "prominence": "Food is the absolute hero in every shot. Restaurant environment supports the food. Hands are acceptable in cooking shots but no faces — let the food do all the talking.",
     },
 
     "fitness": {
         "label": "Fitness & Wellness",
         "subject": "Gym / Studio / Service",
         "shots": """\
-Shot 1 — ENERGY ESTABLISH: The gym, studio, or outdoor training environment — powerful, dynamic, motivating atmosphere.
-Shot 2 — PEAK PERFORMANCE: A person training at full intensity — perfect form, visible effort, powerful and inspiring.
-Shot 3 — COACH / INSTRUCTOR: Expert trainer in action — motivating a client, correcting form, leading with energy and expertise.
-Shot 4 — DETERMINATION DETAIL: Extreme close-up — gripping weights, sweat on skin, focused eyes, muscles engaged — raw and real.
-Shot 5 — ACHIEVEMENT MOMENT: Person completing a set, crossing a finish line, or standing triumphant — transformed, empowered, energized.""",
-        "voiceover": "Motivational and high-energy. Challenge the viewer. Speak to who they want to become. Use short, punchy sentences that hit like reps. End with a powerful call to action.",
-        "prominence": "Human performance and transformation must drive shots 2, 4, and 5. The facility must look professional and high-energy throughout.",
+Shot 1 — FACILITY REVEAL: The gym or studio at its most powerful — rows of gleaming equipment, turf stretching into the background, weights racked perfectly, morning light streaming through tall windows. Empty and cinematic.
+Shot 2 — EQUIPMENT HERO: The signature equipment of the facility as the visual star — a barbell loaded with weight plates catching the light, a cable machine with perfect chrome details, a rowing machine in motion, a boxing bag hanging in dramatic light.
+Shot 3 — TRAINING IN ACTION: Close and dynamic — hands gripping a barbell chalk-covered, feet hitting a treadmill belt in slow motion, a jump rope blurring at speed, weights being racked with authority. Hands and body parts only — no faces needed.
+Shot 4 — PRECISION DETAIL: Extreme close-up — a heart rate monitor reading peak performance, sweat beads on skin in slow motion, grip chalk cloud in dramatic light, a fitness tracker showing results, resistance bands under tension.
+Shot 5 — FACILITY POWER SHOT: Wide-angle cinematic shot of the full facility — all equipment visible, perfect lighting, the promise of transformation conveyed through the space itself. Aspirational and motivating.""",
+        "voiceover": "Motivational and high-energy. Challenge the viewer. Speak to who they want to become. Use short, punchy sentences. Name the equipment and programs available. End with a powerful CTA.",
+        "prominence": "Equipment, tools, and the facility are the visual heroes. Body parts in action (hands, feet, arms) are acceptable close-ups. Full-face shots of people should be avoided — let the equipment and environment tell the story.",
     },
 
     "real_estate": {
         "label": "Real Estate",
         "subject": "Property / Agency",
         "shots": """\
-Shot 1 — EXTERIOR REVEAL: Stunning property exterior — drone pull-back or wide shot at golden hour, showcasing curb appeal.
-Shot 2 — INTERIOR HERO: The most impressive interior space — living room, kitchen, or master suite — beautifully lit and styled.
-Shot 3 — LIFESTYLE MOMENT: A person or family naturally enjoying the space — morning coffee, kids playing, dinner — emotional connection.
-Shot 4 — ARCHITECTURAL DETAIL: Premium finishes in close-up — marble countertops, custom cabinetry, a fireplace, panoramic windows.
-Shot 5 — DREAM CLOSE: Sunset or golden-hour shot of the exterior, or an aspirational lifestyle moment that says "this is the life you deserve.""",
-        "voiceover": "Aspirational and evocative. Don't sell square footage — sell the life. Speak to what it feels like to live there. Close with urgency (limited homes, call today).",
-        "prominence": "The property must be visually stunning and prominently featured in shots 1, 2, and 4. Lifestyle emotion must drive shots 3 and 5.",
+Shot 1 — EXTERIOR REVEAL: Stunning property exterior — drone pull-back or wide shot at golden hour, perfect landscaping, architectural beauty. No people. The home is the star.
+Shot 2 — INTERIOR HERO: The most impressive interior space — open-plan living room, gourmet kitchen, or master suite — beautifully staged, perfectly lit, empty and aspirational.
+Shot 3 — ARCHITECTURAL DETAIL: Premium finishes in close-up — marble countertop surface, custom cabinetry hardware, a fireplace with dancing flames, floor-to-ceiling windows with a view, hardwood floors gleaming.
+Shot 4 — LIFESTYLE ENVIRONMENT: A beautifully set dining table, a coffee mug on a balcony railing with a city view behind it, a perfectly made bed in soft morning light — the suggestion of the life, not people living it.
+Shot 5 — DREAM CLOSE: Sunset or golden-hour wide shot of the full property exterior — the home glowing warmly from within, landscaping lit, the promise of this life made visual.""",
+        "voiceover": "Aspirational and evocative. Don't sell square footage — sell the life. Speak to what it feels like to live there. Close with urgency — limited homes, call today.",
+        "prominence": "The property architecture, interior design, and premium finishes are the heroes in every shot. No people — suggest lifestyle through environment, objects, and atmosphere alone.",
     },
 
     "professional": {
         "label": "Professional Services",
         "subject": "Firm / Practice",
         "shots": """\
-Shot 1 — AUTHORITY ESTABLISH: A polished professional office or workspace — confident, organized, successful. Instills immediate trust.
-Shot 2 — EXPERT CONSULTATION: Professional in engaged conversation with a client — listening, advising, solution-focused body language.
-Shot 3 — THE COMPLEXITY RESOLVED: A visual metaphor of order from chaos — organized documents, a decisive handshake, a clear strategy on screen.
-Shot 4 — PRECISION DETAIL: Close-up of professional at work — writing, analyzing data, signing a document — focused and capable.
-Shot 5 — CLIENT SUCCESS MOMENT: Client leaving with confidence and relief, a handshake closing a deal, or a celebration of a successful outcome.""",
-        "voiceover": "Authoritative and reassuring. Open with the problem your clients face. Establish your expertise and track record. Close with confidence and a clear next step.",
-        "prominence": "The professional must project confidence and expertise in shots 2, 4, and 5. The office environment must feel polished and successful throughout.",
+Shot 1 — AUTHORITY ESTABLISH: A polished, modern professional office — clean desk, city view through floor-to-ceiling windows, neatly organized files, premium furniture. No people. The environment communicates success.
+Shot 2 — EXPERTISE VISUAL: The tools and artifacts of professional excellence — a legal book open to a relevant page, a financial chart on a large monitor showing growth, a contract with a pen ready to sign, a laptop showing clean professional work. Close and credible.
+Shot 3 — PRECISION AT WORK: Hands only — writing notes with a quality pen, typing on a keyboard with purpose, placing a document on a desk, highlighting key text in a brief. Professional detail without faces.
+Shot 4 — RESULTS ON SCREEN: A monitor or document showing positive outcomes — an upward trending graph, a winning legal brief header, a financial report showing gains, a clean project timeline. Abstract proof of expertise.
+Shot 5 — BRAND CLOSE: The full office environment in perfect order — wide shot of the workspace, city skyline visible, everything in its place. The visual promise of competence, trust, and results.""",
+        "voiceover": "Authoritative and reassuring. Open with the problem your clients face. Establish expertise and track record. Close with confidence and a clear next step — free consultation, call today.",
+        "prominence": "Office environment, professional tools, and result visuals are the heroes. No faces — only hands for document/keyboard shots. Every frame must communicate trustworthiness through order and precision.",
     },
 
     "automotive": {
         "label": "Automotive",
         "subject": "Dealership / Auto Service",
         "shots": """\
-Shot 1 — VEHICLE REVEAL: A stunning hero car shot — low angle, dramatic lighting, showroom or open road. Power and beauty.
-Shot 2 — EXPERT SERVICE: Technician working on a vehicle with precision, or salesperson walking a customer through a car with genuine enthusiasm.
-Shot 3 — INTERIOR / DETAIL HERO: The cabin, dashboard, or a specific premium feature — leather, technology, engineering craft up close.
-Shot 4 — THE RESULT: A gleaming, finished vehicle — washed, detailed, showroom-ready — parked in perfect light.
-Shot 5 — CUSTOMER DRIVE-AWAY: Happy customer behind the wheel pulling out, or receiving keys — pride, satisfaction, and freedom.""",
-        "voiceover": "Bold and confident. Speak to performance, trust, and value. For dealerships: speak to the experience. For service shops: speak to reliability and expertise. Strong CTA.",
-        "prominence": "The vehicle must be the visual star in shots 1, 4, and 5. Human expertise and customer satisfaction must drive shots 2 and 5.",
+Shot 1 — VEHICLE REVEAL: A stunning hero car shot — low angle, dramatic lighting, showroom or open road. The vehicle is everything. No people.
+Shot 2 — ENGINEERING DETAIL: Close-up of the vehicle's most impressive features — the engine bay gleaming, a tire gripping pavement in slow motion, a door handle in chrome detail, headlights activating in low light.
+Shot 3 — INTERIOR HERO: The cabin as a luxury environment — stitched leather seats, a backlit dashboard, steering wheel controls, a digital display showing navigation. Aspirational and tactile.
+Shot 4 — SERVICE / TOOLS: For repair shops — professional mechanic tools arranged on a clean surface, a torque wrench on a wheel bolt, a lift raising a vehicle, oil draining in perfect amber slow motion. For dealerships — the showroom floor with vehicles in perfect alignment.
+Shot 5 — THE RESULT: A gleaming, perfectly detailed vehicle in dramatic light — washed, polished, showroom-ready. The vehicle as art.""",
+        "voiceover": "Bold and confident. Speak to performance, trust, and value. For dealerships: sell the experience. For service: sell reliability and expertise. Strong, direct CTA.",
+        "prominence": "The vehicle is the absolute star in every shot. No people — tools and vehicle details only. Every frame should make the viewer want to own or service their vehicle here.",
     },
 
     "education": {
         "label": "Education & Coaching",
         "subject": "School / Program / Coach",
         "shots": """\
-Shot 1 — LEARNING ENVIRONMENT: An inspiring classroom, training space, or online studio setup — bright, organized, motivating.
-Shot 2 — TEACHING MOMENT: Instructor teaching with passion and clarity — engaged with students, animated, clearly an expert.
-Shot 3 — STUDENT BREAKTHROUGH: A student's face showing genuine understanding or excitement — the "aha moment" — authentic and powerful.
-Shot 4 — SKILL IN ACTION: Close-up of a student applying what they've learned — hands on keyboard, practicing, creating, building.
-Shot 5 — ACHIEVEMENT / TRANSFORMATION: Student or graduate looking confident and empowered — the before/after transformation completed.""",
-        "voiceover": "Inspiring and empowering. Open with the limitation or frustration the student faces. Show the transformation your program delivers. Close with a motivating invitation to begin.",
-        "prominence": "The instructor must project expertise and passion in shot 2. Student transformation must be visible and emotional in shots 3 and 5.",
+Shot 1 — LEARNING ENVIRONMENT: An inspiring classroom, training studio, or online workspace — bright, organized, motivating. Clean desks, books, whiteboards with content, screens showing course material. No people.
+Shot 2 — CURRICULUM / TOOLS HERO: The learning materials as the visual star — a textbook open to compelling content, a laptop showing a course interface, flashcards spread on a desk, certificates or diplomas on a wall, specialized equipment for the skill being taught.
+Shot 3 — SKILL IN ACTION: Hands only — writing notes with focus, typing code on a keyboard, sketching a design, solving a problem on paper, using specialized tools relevant to what's being taught. No faces.
+Shot 4 — RESULTS EVIDENCE: Tangible proof of outcomes — a diploma or certificate in frame, a before/after of a student's work, a screen showing a completed project, a grade or score result, a portfolio piece. What success looks like.
+Shot 5 — BRAND / FACILITY CLOSE: The full learning environment at its best — wide shot of the classroom or studio perfectly set up, equipment ready, materials organized. The promise of transformation through preparation.""",
+        "voiceover": "Inspiring and empowering. Open with the limitation the student faces. Show the transformation. Name the specific skills or certifications gained. Close with a motivating invitation to begin.",
+        "prominence": "Learning materials, tools, and result evidence are the visual heroes. No faces — hands on tools or keyboards are acceptable. The environment must look organized, credible, and inspiring.",
     },
 
     "retail": {
         "label": "Retail Store",
         "subject": "Store / Brand",
         "shots": """\
-Shot 1 — STORE REVEAL: Inviting storefront or beautifully merchandised interior — warm, welcoming, visually rich.
-Shot 2 — PRODUCT SHOWCASE: Hero shot of signature or best-selling items — beautifully displayed, styled, irresistible.
-Shot 3 — DISCOVERY MOMENT: A customer's eyes lighting up while discovering something — authentic, joyful, the thrill of finding it.
-Shot 4 — CRAFTSMANSHIP DETAIL: Close-up of product quality — texture, stitching, material, finish — the details that justify the choice.
-Shot 5 — HAPPY CUSTOMER: Satisfied shopper leaving with their purchase, or a warm moment at checkout — the joy of the find.""",
-        "voiceover": "Warm and inviting with a hint of excitement. Speak to discovery, quality, and the joy of finding exactly what you were looking for. Close with an invitation to visit or shop.",
-        "prominence": "Products must be visually prominent and beautiful in shots 2 and 4. The store atmosphere must feel inviting throughout.",
+Shot 1 — STORE REVEAL: Inviting storefront or beautifully merchandised interior — warm lighting, products perfectly displayed, visual richness. No people.
+Shot 2 — HERO PRODUCT SHOWCASE: The best-selling or most signature item as a beauty shot — perfectly lit, styled, irresistible. Product photography quality in motion.
+Shot 3 — PRODUCT DETAIL: Close-up of the product's quality — texture of fabric, grain of wood, shine of metal, color of packaging, the tactile details that justify the purchase. No faces needed.
+Shot 4 — COLLECTION / DISPLAY: A wider shot of products beautifully arranged — shelves styled to perfection, a display table with coordinated items, the full range shown together. The abundance and curation of the store.
+Shot 5 — BRAND CLOSE: The storefront exterior or a signature display at its most beautiful — an invitation to visit. Clean, inviting, and memorable.""",
+        "voiceover": "Warm and inviting with excitement. Speak to quality, uniqueness, and the joy of finding exactly what they were looking for. Close with an invitation to visit or shop online.",
+        "prominence": "Products are the heroes in every single shot. No people — let the products speak entirely for themselves. Every frame should make the viewer want to own what they're seeing.",
     },
 
     "general": {
         "label": "General Business",
         "subject": "Business / Brand",
         "shots": """\
-Shot 1 — BRAND WORLD ESTABLISH: Wide, atmospheric shot that immediately conveys the essence and world of this business.
-Shot 2 — THE CORE OFFER: The most important thing this business does or provides — shown clearly, beautifully, and compellingly.
-Shot 3 — HUMAN CONNECTION: A real person (customer or team member) experiencing genuine benefit or joy from this business.
-Shot 4 — QUALITY DETAIL: Close-up that proves the standard — craftsmanship, care, precision, or the unique differentiator.
-Shot 5 — BRAND CLOSE: A confident, aspirational closing shot that leaves the viewer knowing exactly what this business stands for.""",
-        "voiceover": "Clear, confident, and emotionally resonant. Open with the problem or desire. Show the solution this business provides. Close with a compelling reason to act now.",
-        "prominence": "The business's core offer must be visually clear in shots 2 and 4. Human emotion and connection must drive shots 3 and 5.",
+Shot 1 — BRAND WORLD ESTABLISH: Wide, atmospheric shot that immediately conveys the essence and world of this business — the space, the environment, the tools. No people needed.
+Shot 2 — CORE SERVICE / PRODUCT HERO: The most important thing this business does or provides — shown as a beautiful, compelling close-up of the work, product, or service in its best form.
+Shot 3 — CRAFT / TOOLS IN ACTION: The instruments and tools of this business — close-up of hands at work, equipment operating, materials being transformed. The skill made visible without showing faces.
+Shot 4 — QUALITY DETAIL: An extreme close-up that proves the standard — craftsmanship, precision, or the unique differentiator that sets this business apart from competitors.
+Shot 5 — BRAND CLOSE: A confident, aspirational wide shot of the full business environment — everything in order, everything at its best. The visual promise of what working with this business delivers.""",
+        "voiceover": "Clear, confident, and emotionally resonant. Open with the problem or desire. Show the solution. Name what makes this business different. Close with a compelling reason to act now.",
+        "prominence": "The work, products, tools, and environment are the heroes. Hands in action are acceptable. No faces — let the quality of the work and space communicate everything the viewer needs to know.",
     },
 }
 
