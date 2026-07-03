@@ -159,12 +159,12 @@ def assemble_video(enriched_shots, voiceover_path, output_path, logo_path=None, 
         ], "audio mix")
     logger.info("Audio mixed -> %s", audio_mixed)
 
-    # Step 5 (optional): Overlay logo — two separate passes (top-center then bottom-right)
-    # Two-pass avoids the filter_complex split issue where ffmpeg consumes a single-frame
-    # image stream after the first overlay, leaving the second overlay with no input.
+    # Step 5 (optional): Overlay logo — three passes (top-center, bottom-right, bottom-left)
+    # Three separate passes avoids filter_complex split consuming single-frame image streams.
     if logo_path:
-        logger.info("Overlaying logo '%s' (two-pass) ...", logo_path)
+        logger.info("Overlaying logo '%s' (three-pass) ...", logo_path)
         logo_pass1 = os.path.join(job_dir, "logo_pass1.mp4")
+        logo_pass2 = os.path.join(job_dir, "logo_pass2.mp4")
         try:
             # Pass 1: top-center
             _ffmpeg([
@@ -191,21 +191,36 @@ def assemble_video(enriched_shots, voiceover_path, output_path, logo_path=None, 
                 "-map", "0:a?",
                 "-c:v", "libx264", "-preset", "fast", "-crf", "23",
                 "-c:a", "copy",
-                output_path,
+                logo_pass2,
             ], "logo overlay bottom-right")
 
-            for f in [audio_mixed, logo_pass1]:
+            # Pass 3: bottom-left
+            _ffmpeg([
+                "-i", logo_pass2,
+                "-i", logo_path,
+                "-filter_complex",
+                "[1:v]scale=180:-1,format=rgba,colorchannelmixer=aa=0.85[logo];"
+                "[0:v][logo]overlay=20:H-h-20,format=yuv420p[vout]",
+                "-map", "[vout]",
+                "-map", "0:a?",
+                "-c:v", "libx264", "-preset", "fast", "-crf", "23",
+                "-c:a", "copy",
+                output_path,
+            ], "logo overlay bottom-left")
+
+            for f in [audio_mixed, logo_pass1, logo_pass2]:
                 try:
                     os.remove(f)
                 except Exception:
                     pass
-            logger.info("Logo overlaid (top-center + bottom-right) -> %s", output_path)
+            logger.info("Logo overlaid (top-center + bottom-right + bottom-left) -> %s", output_path)
         except Exception as logo_err:
             logger.error("Logo overlay failed (%s) — delivering without logo", logo_err)
-            try:
-                os.remove(logo_pass1)
-            except Exception:
-                pass
+            for f in [logo_pass1, logo_pass2]:
+                try:
+                    os.remove(f)
+                except Exception:
+                    pass
             try:
                 shutil.move(audio_mixed, output_path)
             except Exception:
