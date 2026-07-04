@@ -135,6 +135,11 @@ def run(
         tb = traceback.format_exc()
         logger.error("Pipeline failed:\n%s", tb)
         result["error"] = str(exc)
+        # Notify the client so they're not left waiting forever
+        try:
+            email_sender.send_failure_notice(client_email, product_name)
+        except Exception as mail_err:
+            logger.error("Could not send failure notice: %s", mail_err)
 
     return result
 

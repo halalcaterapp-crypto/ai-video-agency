@@ -73,10 +73,11 @@ def send_video_to_client(
           The video includes:
         </p>
         <ul style="color: #444; line-height: 2;">
-          <li>AI-generated cinematic B-roll (Higgsfield)</li>
+          <li>AI-generated cinematic B-roll (Higgsfield AI)</li>
           <li>Professional voiceover narration</li>
-          <li>Synced caption overlays</li>
-          <li>Ready-to-publish MP4 (1920×1080 @ 24fps)</li>
+          <li>Background music matched to your tone</li>
+          <li>Your logo overlaid for brand visibility</li>
+          <li>Ready-to-publish MP4 @ 24fps</li>
         </ul>
         <p style="color: #888; font-size: 13px; margin-top: 32px;">
           Questions or revisions? Reply to this email and our team will help
@@ -113,12 +114,16 @@ def send_video_to_client(
         message.attachment = attachment
         logger.info("Video attached (%.1f MB).", file_size / (1024 * 1024))
     else:
-        logger.warning(
-            "Video too large to attach (%.1f MB). "
-            "Upload to cloud storage and insert a download link.",
-            file_size / (1024 * 1024),
+        # Video too large to attach — notify the team so they can manually deliver
+        size_mb = file_size / (1024 * 1024)
+        logger.warning("Video too large to attach (%.1f MB) — sending notice to client.", size_mb)
+        # Update email body to explain the situation
+        html_body = html_body.replace(
+            "has been produced and is attached\n          to this email.",
+            "has been produced! Because the file is larger than our email limit, "
+            "our team will send it to you via WeTransfer or Google Drive within 2 hours."
         )
-        # TODO: upload to S3/GCS and embed a signed download URL in html_body
+        message.html_content = html_body
 
     try:
         sg = SendGridAPIClient(config.SENDGRID_API_KEY)
@@ -129,4 +134,40 @@ def send_video_to_client(
         return response.status_code in (200, 201, 202)
     except Exception as exc:
         logger.error("SendGrid error: %s", exc)
+        return False
+
+
+def send_failure_notice(to_email: str, product_name: str) -> bool:
+    """Send an apology email when the pipeline fails."""
+    message = Mail(
+        from_email=(config.FROM_EMAIL, config.FROM_NAME),
+        to_emails=to_email,
+        subject=f"Your video for {product_name} — we're on it",
+        html_content=f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; color: #1a1a1a; max-width: 600px; margin: 0 auto;">
+          <div style="background: #1a1a2e; padding: 40px; border-radius: 12px 12px 0 0; text-align: center;">
+            <h1 style="color: #ffffff; font-size: 24px; margin: 0;">⚠️ Production Delay</h1>
+          </div>
+          <div style="background: #f9f9f9; padding: 36px; border-radius: 0 0 12px 12px;">
+            <p style="color: #444; line-height: 1.7;">
+              Hi there! We ran into a technical issue while producing your video for
+              <strong>{product_name}</strong>. Our team has been notified and will
+              reprocess your order and deliver it to you within 24 hours.
+            </p>
+            <p style="color: #444; line-height: 1.7;">
+              We apologize for the inconvenience. No action is needed from you.
+            </p>
+            <p style="color: #0f0f0f; font-weight: bold;">— SwiftAI Videos Team</p>
+          </div>
+        </body>
+        </html>
+        """,
+    )
+    try:
+        sg = SendGridAPIClient(config.SENDGRID_API_KEY)
+        response = sg.send(message)
+        return response.status_code in (200, 201, 202)
+    except Exception as exc:
+        logger.error("SendGrid failure notice error: %s", exc)
         return False

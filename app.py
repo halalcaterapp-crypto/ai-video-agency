@@ -69,6 +69,12 @@ def order():
                                       "or purchase a video below.")
 
 
+@app.route("/paid", methods=["GET"])
+def paid():
+    """Entry point for customers who paid via Stripe — no token required."""
+    return render_template("form.html", token="PAID")
+
+
 @app.route("/generate", methods=["POST"])
 def generate():
     token         = request.form.get("token", "").strip()
@@ -81,11 +87,13 @@ def generate():
     generate_logo = request.form.get("generate_logo") == "1"
 
     # Re-validate token before doing any work
-    token_status = token_store.validate_token(token)
-    if token_status != "valid":
-        return render_template("token_error.html",
-                               message="This link has already been used or is invalid.",
-                               detail="Purchase a video to create more.")
+    # "PAID" is the special bypass token for Stripe customers — no DB check needed
+    if token != "PAID":
+        token_status = token_store.validate_token(token)
+        if token_status != "valid":
+            return render_template("token_error.html",
+                                   message="This link has already been used or is invalid.",
+                                   detail="Purchase a video to create more.")
 
     errors = []
     if not product_name:
@@ -116,11 +124,13 @@ def generate():
         generate_logo = False
 
     # Consume token atomically — prevents double-submission
-    consumed = token_store.consume_token(token, client_email)
-    if not consumed:
-        return render_template("token_error.html",
-                               message="This link was just used by someone else.",
-                               detail="Purchase a video to create more.")
+    # PAID token bypasses DB entirely (Stripe customers)
+    if token != "PAID":
+        consumed = token_store.consume_token(token, client_email)
+        if not consumed:
+            return render_template("token_error.html",
+                                   message="This link was just used by someone else.",
+                                   detail="Purchase a video to create more.")
 
     thread = threading.Thread(
         target=pipeline.run,
