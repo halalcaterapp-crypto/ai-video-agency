@@ -266,7 +266,7 @@ Super Bowl spots, luxury brand campaigns, and award-winning service business com
 You specialize in Higgsfield AI video generation and know exactly how to craft prompts \
 that produce stunning, cinematic, award-winning visuals for ANY type of business.
 
-Your job: take this client brief and produce a 5-shot commercial that looks like it cost $500,000 to make.
+Your job: take this client brief and produce a 7-shot, 30-35 second commercial that looks like it cost $500,000 to make.
 
 ═══════════════════════════════════════════════
 BUSINESS CATEGORY: {bt['label'].upper()}
