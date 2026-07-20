@@ -288,6 +288,9 @@ def generate_storyboard(
     tone: str,
     key_benefits: str = "",
     business_type: str = "product",
+    business_address: str = "",
+    business_phone: str = "",
+    business_website: str = "",
 ) -> dict:
     """
     Call Claude with the director system prompt and client brief.
@@ -302,12 +305,23 @@ def generate_storyboard(
         f"Key Benefits / What Makes It Unique: {key_benefits}\n"
         if key_benefits else ""
     )
+    address_line = f"Business Address: {business_address}\n" if business_address else ""
+    phone_line   = f"Phone Number: {business_phone}\n"       if business_phone   else ""
+    website_line = f"Website: {business_website}\n"          if business_website else ""
+
+    contact_block = ""
+    if address_line or phone_line or website_line:
+        contact_block = (
+            "\nCONTACT DETAILS — weave these naturally into the CTA voiceover of Shot 7:\n"
+            + address_line + phone_line + website_line
+        )
 
     user_message = (
         f"{subject_label} Name: {product_name}\n"
         f"Target Audience: {target_audience}\n"
         f"Tone / Style: {tone}\n"
         f"{benefits_line}"
+        f"{contact_block}"
         f"\nIMPORTANT: Every shot and every voiceover line must directly and unmistakably "
         f"represent THIS specific {subject_label.lower()} — '{product_name}'. "
         "Do NOT use generic visuals. The viewer must know exactly what this business is "

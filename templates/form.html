@@ -415,6 +415,39 @@
         required
       />
 
+      <label for="business_address">
+        Business Address <span class="hint">optional — used in the video CTA</span>
+      </label>
+      <input
+        type="text"
+        id="business_address"
+        name="business_address"
+        placeholder="e.g. 123 Main St, Brooklyn, NY 11201"
+        value="{{ business_address or '' }}"
+      />
+
+      <label for="business_phone">
+        Phone Number <span class="hint">optional — used in the video CTA</span>
+      </label>
+      <input
+        type="text"
+        id="business_phone"
+        name="business_phone"
+        placeholder="e.g. (718) 555-0192"
+        value="{{ business_phone or '' }}"
+      />
+
+      <label for="business_website">
+        Website URL <span class="hint">optional — used in the video CTA</span>
+      </label>
+      <input
+        type="text"
+        id="business_website"
+        name="business_website"
+        placeholder="e.g. www.mybusiness.com"
+        value="{{ business_website or '' }}"
+      />
+
       <label for="key_benefits">
         What makes you unique? Key benefits &amp; differentiators
         <span class="hint">highly recommended — the more detail, the better your video</span>

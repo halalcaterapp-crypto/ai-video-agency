@@ -77,14 +77,17 @@ def paid():
 
 @app.route("/generate", methods=["POST"])
 def generate():
-    token         = request.form.get("token", "").strip()
-    product_name  = request.form.get("product_name", "").strip()
-    target_audience = request.form.get("target_audience", "").strip()
-    tone          = request.form.get("tone", "").strip()
-    client_email  = request.form.get("client_email", "").strip()
-    key_benefits  = request.form.get("key_benefits", "").strip()
-    business_type = request.form.get("business_type", "product").strip() or "product"
-    generate_logo = request.form.get("generate_logo") == "1"
+    token            = request.form.get("token", "").strip()
+    product_name     = request.form.get("product_name", "").strip()
+    target_audience  = request.form.get("target_audience", "").strip()
+    tone             = request.form.get("tone", "").strip()
+    client_email     = request.form.get("client_email", "").strip()
+    key_benefits     = request.form.get("key_benefits", "").strip()
+    business_type    = request.form.get("business_type", "product").strip() or "product"
+    generate_logo    = request.form.get("generate_logo") == "1"
+    business_address = request.form.get("business_address", "").strip()
+    business_phone   = request.form.get("business_phone", "").strip()
+    business_website = request.form.get("business_website", "").strip()
 
     # Re-validate token before doing any work
     # "PAID" is the special bypass token for Stripe customers — no DB check needed
@@ -109,7 +112,10 @@ def generate():
                                target_audience=target_audience,
                                tone=tone,
                                client_email=client_email,
-                               business_type=business_type)
+                               business_type=business_type,
+                               business_address=business_address,
+                               business_phone=business_phone,
+                               business_website=business_website)
 
     # Handle optional logo upload
     logo_path = None
@@ -143,6 +149,9 @@ def generate():
             logo_path=logo_path,
             generate_logo=generate_logo,
             business_type=business_type,
+            business_address=business_address,
+            business_phone=business_phone,
+            business_website=business_website,
         ),
         daemon=True,
     )
