@@ -106,6 +106,7 @@ def assemble_video(enriched_shots, voiceover_path, output_path, logo_path=None, 
 
     # Step 4: Mix voiceover + optional background music
     logger.info("Mixing audio from '%s' ...", voiceover_path)
+
     # Validate logo BEFORE deciding on temp vs final path so we don't orphan audio_mixed
     if logo_path and os.path.exists(logo_path):
         logo_size = os.path.getsize(logo_path)
@@ -116,13 +117,32 @@ def assemble_video(enriched_shots, voiceover_path, output_path, logo_path=None, 
         logger.warning("Logo path not found — skipping overlay: %s", logo_path)
         logo_path = None
 
+    # Get durations early so we can pad if voiceover outlasts the video clips
+    video_dur = _get_duration(concat_mp4)
+    voice_dur = _get_duration(voiceover_path)
+
+    # Pad last frame if voiceover is longer than the concatenated clips (prevents CTA cut-off)
+    target_dur = max(video_dur, voice_dur + 1.5)  # 1.5s tail after voiceover ends
+    if target_dur > video_dur + 0.3:
+        extra = target_dur - video_dur
+        logger.info(
+            "Voiceover (%.1fs) exceeds video (%.1fs) — freezing last frame for %.1fs",
+            voice_dur, video_dur, extra,
+        )
+        padded_mp4 = os.path.join(job_dir, "padded.mp4")
+        _ffmpeg([
+            "-i", concat_mp4,
+            "-vf", f"tpad=stop_mode=clone:stop_duration={extra:.3f}",
+            "-c:v", "libx264", "-preset", "fast", "-crf", "23",
+            padded_mp4,
+        ], "pad last frame to voiceover length")
+        concat_mp4 = padded_mp4
+        video_dur = target_dur
+
     # Only write to temp file if we have a confirmed valid logo to overlay
     audio_mixed = os.path.join(job_dir, "audio_mixed.mp4") if logo_path else output_path
 
     if music_path and os.path.exists(music_path):
-        # Get durations for smart music volume automation
-        video_dur = _get_duration(concat_mp4)
-        voice_dur = _get_duration(voiceover_path)
         ramp_end = voice_dur + 1.0  # 1-second ramp from 12% to 35% after VO ends
         logger.info(
             "Mixing with background music (video=%.1fs, voice=%.1fs, music=%s)",
@@ -155,6 +175,7 @@ def assemble_video(enriched_shots, voiceover_path, output_path, logo_path=None, 
             "-map", "1:a",
             "-c:v", "copy",
             "-c:a", "aac", "-b:a", "192k",
+            "-shortest",
             audio_mixed,
         ], "audio mix")
     logger.info("Audio mixed -> %s", audio_mixed)

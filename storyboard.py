@@ -238,21 +238,21 @@ STRICT OUTPUT RULES
 2. Follow this exact schema:
 {
   "project_title": "Catchy, evocative title",
-  "full_voiceover": "The complete 25-30 second spoken script.",
-  "total_estimated_duration": 30,
+  "full_voiceover": "The complete 30-38 second spoken script.",
+  "total_estimated_duration": 38,
   "shots": [
     {
       "scene_number": 1,
       "voiceover_segment": "The specific line spoken during this shot.",
-      "duration_seconds": 4,
+      "duration_seconds": 5,
       "higgsfield_prompt": "Your full cinematic prompt following all rules above."
     }
   ]
 }
-3. Exactly 7 shots. Duration per shot: 4–5 seconds each. Total must reach 28–35 seconds.
+3. Exactly 7 shots. Duration per shot: 5–6 seconds each. Shot 7 must be 7–8 seconds (CTA needs time). Total must reach 35–42 seconds.
    Shots 1–5 follow the business type structure above.
    Shot 6 — REINFORCEMENT: A second hero visual that deepens the brand story — a different angle on the main service, product, or environment.
-   Shot 7 — CALL TO ACTION CLOSE: A final aspirational wide or beauty shot that leaves the viewer with a strong emotional impression and visual memory of this business.
+   Shot 7 — CALL TO ACTION CLOSE: A final aspirational wide or beauty shot. The voiceover_segment for Shot 7 MUST include the full CTA — business name, address (if provided), phone number (if provided), and website (if provided) — spoken completely with no rush.
 4. Every higgsfield_prompt MUST end with the film quality markers.
 5. Output ONLY the JSON. Nothing else."""
 
