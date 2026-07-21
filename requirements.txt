@@ -5,3 +5,4 @@ requests>=2.32.0
 sendgrid>=6.11.0
 python-dotenv>=1.0.0
 imageio-ffmpeg>=0.4.9
+psycopg2-binary>=2.9.9
