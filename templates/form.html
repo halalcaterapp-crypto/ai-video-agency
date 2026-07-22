@@ -245,6 +245,19 @@
       line-height: 1.6;
     }
 
+    /* ── Category Divider ── */
+    .biz-divider {
+      grid-column: 1 / -1;
+      font-size: 10px;
+      font-weight: 700;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      padding: 10px 0 2px;
+      border-top: 1px solid #1e1e30;
+      margin-top: 4px;
+    }
+
     /* ── Responsive ── */
     @media (max-width: 480px) {
       .card { padding: 32px 22px; }
@@ -398,12 +411,65 @@
           </div>
         </label>
 
+        <!-- ── Creative & Fun ── -->
+        <div class="biz-divider">Creative &amp; Fun</div>
+
+        <label class="biz-card">
+          <input type="radio" name="business_type" value="fantasy"
+            {% if business_type == 'fantasy' %}checked{% endif %}
+            onchange="onBizChange(this.value)" />
+          <div class="biz-card-inner">
+            <span class="biz-icon">🐉</span>
+            <span class="biz-label">Fantasy &amp;<br>Adventure</span>
+          </div>
+        </label>
+
+        <label class="biz-card">
+          <input type="radio" name="business_type" value="space"
+            {% if business_type == 'space' %}checked{% endif %}
+            onchange="onBizChange(this.value)" />
+          <div class="biz-card-inner">
+            <span class="biz-icon">🚀</span>
+            <span class="biz-label">Space &amp;<br>Sci-Fi</span>
+          </div>
+        </label>
+
+        <label class="biz-card">
+          <input type="radio" name="business_type" value="nature"
+            {% if business_type == 'nature' %}checked{% endif %}
+            onchange="onBizChange(this.value)" />
+          <div class="biz-card-inner">
+            <span class="biz-icon">🐬</span>
+            <span class="biz-label">Ocean &amp;<br>Wildlife</span>
+          </div>
+        </label>
+
+        <label class="biz-card">
+          <input type="radio" name="business_type" value="kids"
+            {% if business_type == 'kids' %}checked{% endif %}
+            onchange="onBizChange(this.value)" />
+          <div class="biz-card-inner">
+            <span class="biz-icon">✨</span>
+            <span class="biz-label">Kids &amp;<br>Magic</span>
+          </div>
+        </label>
+
+        <label class="biz-card">
+          <input type="radio" name="business_type" value="cinematic"
+            {% if business_type == 'cinematic' %}checked{% endif %}
+            onchange="onBizChange(this.value)" />
+          <div class="biz-card-inner">
+            <span class="biz-icon">🎬</span>
+            <span class="biz-label">Cinematic<br>Story</span>
+          </div>
+        </label>
+
       </div>
       <!-- end biz-grid -->
 
       <!-- ── STEP 2: Business / Product Details ── -->
       <label for="product_name">
-        Business / Brand Name
+        <span id="label_name">Business / Brand Name</span>
         <span class="hint">required</span>
       </label>
       <input
@@ -415,6 +481,7 @@
         required
       />
 
+      <div id="contact_fields">
       <label for="business_address">
         Business Address <span class="hint">optional — used in the video CTA</span>
       </label>
@@ -447,9 +514,10 @@
         placeholder="e.g. www.mybusiness.com"
         value="{{ business_website or '' }}"
       />
+      </div>
 
       <label for="key_benefits">
-        What makes you unique? Key benefits &amp; differentiators
+        <span id="label_benefits">What makes you unique? Key benefits &amp; differentiators</span>
         <span class="hint">highly recommended — the more detail, the better your video</span>
       </label>
       <textarea
@@ -459,7 +527,7 @@
       >{{ key_benefits or '' }}</textarea>
 
       <label for="target_audience">
-        Target Audience
+        <span id="label_audience">Target Audience</span>
         <span class="hint">required</span>
       </label>
       <textarea
@@ -594,14 +662,54 @@
         name:     'e.g. Sunrise Staffing Solutions',
         benefits: 'e.g. 10+ years serving local businesses, 48-hour placements, specialized in healthcare & tech staffing',
         audience: 'e.g. Local business owners and managers who need reliable staffing solutions quickly'
+      },
+
+      // ── Creative & Fun ──
+      fantasy: {
+        name:     'e.g. The Dragon of Ember Peak',
+        benefits: 'e.g. Ancient fire dragon, obsidian black scales with golden eyes, awakening from a 1000-year sleep, ruler of the volcanic mountains',
+        audience: 'e.g. Fantasy fans, kids and adults who love epic creatures and adventure'
+      },
+      space: {
+        name:     'e.g. First Human Mission to Mars',
+        benefits: 'e.g. Three astronauts, a massive red dust storm on arrival, discovering an ancient buried structure beneath the surface',
+        audience: 'e.g. Space enthusiasts, sci-fi fans, dreamers of all ages'
+      },
+      nature: {
+        name:     'e.g. Dolphins of the Pacific',
+        benefits: 'e.g. A pod of 20 spinner dolphins, crystal blue water, playing in the bow wave of a ship, leaping at sunset',
+        audience: 'e.g. Nature lovers, ocean fans, wildlife documentary enthusiasts'
+      },
+      kids: {
+        name:     'e.g. Sparkle the Friendly Dragon',
+        benefits: 'e.g. Small purple dragon who breathes rainbow fire, lives in a candy forest, loves making new friends and going on tiny adventures',
+        audience: 'e.g. Children aged 3-8, parents looking for magical fun content'
+      },
+      cinematic: {
+        name:     'e.g. The Last Letter',
+        benefits: 'e.g. A mysterious old letter found in an attic, golden afternoon light, rain on windows, the feeling of something unfinished and beautiful',
+        audience: 'e.g. Anyone who loves beautiful, thought-provoking short films'
       }
     };
 
+    var FUN_TYPES = ['fantasy', 'space', 'nature', 'kids', 'cinematic'];
+
     function onBizChange(val) {
       var hints = BIZ_HINTS[val] || BIZ_HINTS['general'];
-      document.getElementById('product_name').placeholder  = hints.name;
-      document.getElementById('key_benefits').placeholder  = hints.benefits;
+      var isFun = FUN_TYPES.indexOf(val) !== -1;
+
+      // Update placeholders
+      document.getElementById('product_name').placeholder    = hints.name;
+      document.getElementById('key_benefits').placeholder    = hints.benefits;
       document.getElementById('target_audience').placeholder = hints.audience;
+
+      // Update field labels for fun types
+      document.getElementById('label_name').textContent     = isFun ? 'Video Title / Concept Name' : 'Business / Brand Name';
+      document.getElementById('label_benefits').textContent = isFun ? 'Describe your concept in detail' : 'What makes you unique? Key benefits & differentiators';
+      document.getElementById('label_audience').textContent = isFun ? 'Who is this video for?' : 'Target Audience';
+
+      // Hide contact fields for fun/creative types
+      document.getElementById('contact_fields').style.display = isFun ? 'none' : '';
     }
 
     function handleLogoChoice(val) {

@@ -179,7 +179,77 @@ Shot 5 — BRAND CLOSE: A confident, aspirational wide shot of the full business
         "voiceover": "Clear, confident, and emotionally resonant. Open with the problem or desire. Show the solution. Name what makes this business different. Close with a compelling reason to act now.",
         "prominence": "The work, products, tools, and environment are the heroes. Hands in action are acceptable. No faces — let the quality of the work and space communicate everything the viewer needs to know.",
     },
+
+    # ── CREATIVE & FUN CATEGORIES ─────────────────────────────────────────────
+
+    "fantasy": {
+        "label": "Fantasy & Adventure",
+        "subject": "Story / World",
+        "shots": """\
+Shot 1 — EPIC WORLD REVEAL: A sweeping, awe-inspiring establishing shot of the fantasy world — ancient mountains with glowing runes, a dark enchanted forest, a volcanic dragon lair, a mystical castle shrouded in purple mist. Grand scale, otherworldly beauty, no people.
+Shot 2 — CREATURE / HERO REVEAL: The main subject appears dramatically — a dragon bursting from a cave with wings spreading wide, a sea serpent rising from churning water, a phoenix erupting in flame. The moment of first sight — maximum visual impact.
+Shot 3 — POWER IN ACTION: The creature or hero doing what it does best — dragon breathing a massive arc of fire, a giant eagle diving through storm clouds, a sea monster spiraling into the deep. Dynamic, kinetic, breathtaking.
+Shot 4 — EPIC SCALE: A shot that conveys impossible scale — the creature dwarfing a mountain range, soaring above a burning city, casting a shadow over a forest. The viewer must feel the magnitude.
+Shot 5 — CLIMACTIC MOMENT: The emotional peak — a dragon roaring at the summit against a lightning-split sky, a creature at rest showing majestic beauty and intelligence, a golden eye blinking slowly in firelight. Cinematic and unforgettable.""",
+        "voiceover": "Epic, mythic, storytelling narration. Paint the world with words. Build tension and wonder. NO sales language or CTA — this is pure narrative immersion. End with a line that leaves the viewer breathless.",
+        "prominence": "The creature, hero, or world IS the entire video. Every shot must feel like a $200M fantasy film. Scale, drama, fire, light, and cinematic beauty drive everything.",
+    },
+
+    "space": {
+        "label": "Space & Sci-Fi",
+        "subject": "Story / Mission",
+        "shots": """\
+Shot 1 — LAUNCH / DEPARTURE: A rocket on a floodlit launch pad with steam and fire billowing, or Earth's curvature from low orbit showing cloud patterns and ocean blue below. The journey begins — scale is everything.
+Shot 2 — THE VOID: Deep space in all its glory — a spacecraft moving silently against a star field, a nebula in stunning purples and golds, the Moon or Mars growing larger as we approach. Infinite, silent, beautiful.
+Shot 3 — ARRIVAL: The destination fills the frame — the cratered lunar surface rising, rust-red Mars from orbit with dust storms swirling, an alien planet with twin suns on the horizon. First contact with another world.
+Shot 4 — EXPLORATION: A spacesuit-clad astronaut or advanced rover on the surface — footprints in lunar dust, a flag planted with Earth visible in the black sky, a rover tracing tracks across red Martian soil in golden light.
+Shot 5 — THE VIEW: The most awe-inspiring sight the destination offers — Earth as a tiny blue marble from deep space, the Milky Way arching over the Moon's horizon, a Martian sunset painting the sky in purples and electric blues. Pure wonder.""",
+        "voiceover": "Awe-inspiring, philosophical narration. Speak to the wonder of exploration, the vastness of the cosmos, humanity reaching beyond its limits. NO sales language. End with something that gives the viewer chills.",
+        "prominence": "Space, the destination, and cosmic scale are the heroes. Every shot must feel like a Christopher Nolan space epic. Light, silence, and scale drive the emotion.",
+    },
+
+    "nature": {
+        "label": "Ocean & Wildlife",
+        "subject": "Creature / Scene",
+        "shots": """\
+Shot 1 — HABITAT REVEAL: The ocean or natural environment at its most magnificent — waves crashing on a reef shot from underwater, a coral garden lit by shafts of sunlight piercing from above, an open ocean with light dancing on the surface. Nature at its most breathtaking.
+Shot 2 — CREATURE REVEAL: The star animal appears in full beauty — a dolphin gliding effortlessly through crystal-clear water, a humpback whale turning slowly in the blue deep, an eagle banking against a mountain backdrop. Pure, stunning wildlife.
+Shot 3 — BEHAVIOUR IN ACTION: The animal doing something remarkable — dolphins leaping in perfectly synchronized arcs, a whale singing with the resonance visible in the water, a pod racing at full speed just below the surface. Nature being nature.
+Shot 4 — INTIMATE CLOSE-UP: An extreme close-up revealing character — a dolphin's eye and smile, the barnacled skin of a whale with remoras clinging, the iridescent scales of a fish catching sunlight. Details that make it feel real and alive.
+Shot 5 — ICONIC MOMENT: The poster shot — a dolphin perfectly silhouetted at the crest of a wave against a golden sunset, a whale breach frozen in slow motion, a shark circling in cathedral light filtering from above. The shot people never forget.""",
+        "voiceover": "Gentle, reverent, David Attenborough-style narration. Speak to the wonder, intelligence, and beauty of the creature. Build emotional connection. NO CTA. End with something that makes the viewer want to protect these animals.",
+        "prominence": "The animal and its habitat are everything. Every shot must feel like BBC Planet Earth. Beauty, authenticity, and emotional connection are the only goals.",
+    },
+
+    "kids": {
+        "label": "Kids & Magic",
+        "subject": "Story / Character",
+        "shots": """\
+Shot 1 — MAGICAL WORLD OPENS: A vibrant, colorful, wonderous world reveals itself — a candy-colored enchanted forest with glowing mushrooms and fireflies, floating islands in fluffy clouds, a fairytale village at golden sunset. Warm, safe, bursting with color and joy.
+Shot 2 — CHARACTER REVEAL: The main character or magical creature appears — a friendly dragon with huge sparkly eyes and a tiny crown, a giggling fairy with rainbow wings, a talking bear in a little adventure hat. Immediately adorable and loveable.
+Shot 3 — THE ADVENTURE BEGINS: Something exciting happens — the character discovers a magical glowing object, sets off on a journey through a rainbow portal, makes a surprising new friend. Energy, movement, joy, color everywhere.
+Shot 4 — MAGICAL MOMENT: The most magical thing in the story — a wish coming true in a burst of golden sparkles, all the creature friends dancing together in a flower meadow, a rainbow bridge appearing over a waterfall, a dragon blowing rainbow fire. Pure childhood wonder at maximum.
+Shot 5 — HAPPY ENDING: Warm, satisfying, joyful — characters celebrating together with confetti and stars, a treasure chest opening to reveal more friends inside, the sun setting over a peaceful magical landscape with everyone together. The viewer feels happy, safe, and full of wonder.""",
+        "voiceover": "Warm, gentle, storytelling voice. Simple words. Build wonder and excitement. Safe and appropriate for all ages. Rhymes or a musical quality are welcome. End with something that makes children smile and immediately want to watch again.",
+        "prominence": "The magical character, creature, or world is the entire story. Every shot must feel like a Pixar film or fairy tale illustration brought to life. Color, warmth, charm, and pure joy drive everything.",
+    },
+
+    "cinematic": {
+        "label": "Cinematic Story",
+        "subject": "Concept / Story",
+        "shots": """\
+Shot 1 — MOOD ESTABLISH: A cinematic, atmospheric opening that immediately sets the tone and draws the viewer into this world — moody, beautiful, intriguing, or surprising. Make the viewer lean forward in their seat.
+Shot 2 — SUBJECT REVEAL: The main focus of the story is introduced with maximum visual impact — a person, an object, a place, or a moment. Everything else in the video orbits around this.
+Shot 3 — THE HEART: The central emotion or theme of the story made visible through pure image — whatever this story is about, this shot communicates it without a single word. Trust the image.
+Shot 4 — THE TURN: A moment of shift, revelation, or contrast — light changes dramatically, a new element enters the frame, or we see the same thing from a completely unexpected angle. Something transforms.
+Shot 5 — RESONANT CLOSE: A final image that stays with the viewer long after it ends — beautiful, thought-provoking, emotionally complete. The kind of shot people describe to their friends the next day.""",
+        "voiceover": "Cinematic, literary, poetic narration. Write like a short film, not an ad. Let the words add emotional layers rather than describe what we see. Prose that lingers. End with something that echoes in the mind.",
+        "prominence": "Mood, atmosphere, and pure visual storytelling are everything. This is cinema. Every shot must be intentional, emotionally resonant, and beautiful.",
+    },
 }
+
+# Creative/fun types that use storytelling narration instead of commercial CTA
+FUN_TYPES = {"fantasy", "space", "nature", "kids", "cinematic"}
 
 # ─────────────────────────────────────────────────────────────────────────────
 # STATIC CINEMATOGRAPHY RULES (shared across all business types)
@@ -260,13 +330,28 @@ STRICT OUTPUT RULES
 def _build_prompt(business_type: str) -> str:
     """Build the complete director system prompt for the given business type."""
     bt = BUSINESS_TYPES.get(business_type) or BUSINESS_TYPES["general"]
+    is_fun = business_type in FUN_TYPES
 
-    return f"""You are a world-class Commercial Director and AI Prompt Engineer with credits on \
-Super Bowl spots, luxury brand campaigns, and award-winning service business commercials. \
-You specialize in Higgsfield AI video generation and know exactly how to craft prompts \
-that produce stunning, cinematic, award-winning visuals for ANY type of business.
+    if is_fun:
+        role_intro = (
+            "You are a world-class Cinematic Director and AI Prompt Engineer with credits on "
+            "Hollywood blockbusters, award-winning short films, and viral nature documentaries. "
+            "You specialize in Higgsfield AI video generation and know exactly how to craft prompts "
+            "that produce breathtaking, emotionally powerful visuals for any creative concept."
+        )
+        job_desc = "produce a 7-shot, 35-42 second cinematic short video that looks like it was directed by a Hollywood filmmaker."
+    else:
+        role_intro = (
+            "You are a world-class Commercial Director and AI Prompt Engineer with credits on "
+            "Super Bowl spots, luxury brand campaigns, and award-winning service business commercials. "
+            "You specialize in Higgsfield AI video generation and know exactly how to craft prompts "
+            "that produce stunning, cinematic, award-winning visuals for ANY type of business."
+        )
+        job_desc = "produce a 7-shot, 35-42 second commercial that looks like it cost $500,000 to make."
 
-Your job: take this client brief and produce a 7-shot, 30-35 second commercial that looks like it cost $500,000 to make.
+    return f"""{role_intro}
+
+Your job: take this client brief and {job_desc}
 
 ═══════════════════════════════════════════════
 BUSINESS CATEGORY: {bt['label'].upper()}
@@ -310,7 +395,7 @@ def generate_storyboard(
     website_line = f"Website: {business_website}\n"          if business_website else ""
 
     contact_block = ""
-    if address_line or phone_line or website_line:
+    if (address_line or phone_line or website_line) and business_type not in FUN_TYPES:
         contact_block = (
             "\nCONTACT DETAILS — weave these naturally into the CTA voiceover of Shot 7:\n"
             + address_line + phone_line + website_line
