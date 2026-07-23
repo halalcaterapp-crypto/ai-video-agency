@@ -20,7 +20,8 @@ logger = logging.getLogger(__name__)
 
 HF_BASE = "https://platform.higgsfield.ai"
 POLL_INTERVAL = 8
-MAX_POLLS = 150
+MAX_POLLS = 300        # 40 minutes per job (Higgsfield queue can be slow)
+MAX_SHOT_RETRIES = 2   # retry timed-out shots before failing the pipeline
 
 # Suffix appended to prompts on NSFW retry — strips risky language, asserts safety
 _NSFW_SAFE_SUFFIX = (
@@ -150,7 +151,8 @@ def _submit_t2i(prompt, scene_number):
         raise
 
 
-def generate_shot_clip(scene_number, prompt, duration_seconds, job_dir):
+def _generate_shot_clip_once(scene_number, prompt, duration_seconds, job_dir):
+    """Single attempt to generate one shot clip (T2I → I2V)."""
     shot_dir = os.path.join(job_dir, f"shot_{scene_number:02d}")
     os.makedirs(shot_dir, exist_ok=True)
 
@@ -176,6 +178,25 @@ def generate_shot_clip(scene_number, prompt, duration_seconds, job_dir):
     _download(video_url, clip_path)
     logger.info("Shot %02d: Clip saved -> %s", scene_number, clip_path)
     return clip_path
+
+
+def generate_shot_clip(scene_number, prompt, duration_seconds, job_dir):
+    """Generate one shot clip with automatic retry on Higgsfield timeout."""
+    last_err = None
+    for attempt in range(1, MAX_SHOT_RETRIES + 1):
+        try:
+            return _generate_shot_clip_once(scene_number, prompt, duration_seconds, job_dir)
+        except TimeoutError as exc:
+            last_err = exc
+            if attempt < MAX_SHOT_RETRIES:
+                logger.warning(
+                    "Shot %02d timed out (attempt %d/%d) — waiting 60s then retrying...",
+                    scene_number, attempt, MAX_SHOT_RETRIES,
+                )
+                time.sleep(60)
+            else:
+                logger.error("Shot %02d failed after %d attempts.", scene_number, MAX_SHOT_RETRIES)
+    raise last_err
 
 
 def generate_all_clips(shots, job_dir):
