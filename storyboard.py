@@ -319,12 +319,21 @@ STRICT OUTPUT RULES
     }
   ]
 }
-3. Exactly 7 shots. Duration per shot: 5–6 seconds each. Shot 7 must be 7–8 seconds (CTA needs time). Total must reach 35–42 seconds.
-   Shots 1–5 follow the business type structure above.
-   Shot 6 — REINFORCEMENT: A second hero visual that deepens the brand story — a different angle on the main service, product, or environment.
-   Shot 7 — CALL TO ACTION CLOSE: A final aspirational wide or beauty shot. The voiceover_segment for Shot 7 MUST include the full CTA — business name, address (if provided), phone number (if provided), and website (if provided) — spoken completely with no rush.
+3. {SHOT7_RULE}
 4. Every higgsfield_prompt MUST end with the film quality markers.
 5. Output ONLY the JSON. Nothing else."""
+
+_SHOT7_BUSINESS = """\
+Exactly 7 shots. Duration per shot: 5–6 seconds each. Shot 7 must be 7–8 seconds (CTA needs time). Total must reach 35–42 seconds.
+   Shots 1–5 follow the business type structure above.
+   Shot 6 — REINFORCEMENT: A second hero visual that deepens the brand story — a different angle on the main service, product, or environment.
+   Shot 7 — CALL TO ACTION CLOSE: A final aspirational wide or beauty shot. The voiceover_segment for Shot 7 MUST include the full CTA — business name, address (if provided), phone number (if provided), and website (if provided) — spoken completely with no rush."""
+
+_SHOT7_FUN = """\
+Exactly 7 shots. Duration per shot: 5–6 seconds each. Shot 7 must be 6–7 seconds. Total must reach 35–42 seconds.
+   Shots 1–5 follow the creative structure above.
+   Shot 6 — REINFORCEMENT: A second powerful visual that deepens the emotional impact of the story.
+   Shot 7 — CINEMATIC CLOSE: The most beautiful, powerful, or emotionally resonant shot of the entire video. Pure payoff — no selling, no plugging a business. The voiceover_segment for Shot 7 MUST be a closing line of pure storytelling that echoes in the mind after the video ends. ABSOLUTELY NO "visit us", NO business address, NO phone number, NO call-to-action of any kind. Just cinema."""
 
 
 def _build_prompt(business_type: str) -> str:
@@ -349,6 +358,9 @@ def _build_prompt(business_type: str) -> str:
         )
         job_desc = "produce a 7-shot, 35-42 second commercial that looks like it cost $500,000 to make."
 
+    shot7_rule = _SHOT7_FUN if is_fun else _SHOT7_BUSINESS
+    cinematography_rules = _CINEMATOGRAPHY_RULES.replace("{SHOT7_RULE}", shot7_rule)
+
     return f"""{role_intro}
 
 Your job: take this client brief and {job_desc}
@@ -364,7 +376,7 @@ VISUAL PROMINENCE RULE: {bt['prominence']}
 VOICEOVER STYLE FOR THIS CATEGORY:
 {bt['voiceover']}
 
-{_CINEMATOGRAPHY_RULES}"""
+{cinematography_rules}"""
 
 
 def generate_storyboard(
