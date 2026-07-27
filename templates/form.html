@@ -518,24 +518,39 @@
 
       <label for="key_benefits">
         <span id="label_benefits">What makes you unique? Key benefits &amp; differentiators</span>
-        <span class="hint">highly recommended — the more detail, the better your video</span>
+        <span class="hint">the more detail you give, the better your video — write 2–4 sentences</span>
       </label>
       <textarea
         id="key_benefits"
         name="key_benefits"
-        placeholder="e.g. All-natural ingredients, lasts 3x longer than competitors, eco-friendly packaging, award-winning formula trusted by 50,000+ customers"
+        style="min-height: 110px;"
+        placeholder="Examples:
+• Restaurant: We serve authentic halal Pakistani cuisine. Our specialty is hand-made dum biryani slow-cooked for 4 hours. We are open 7 days a week and offer free delivery within 3 miles.
+• Doctor: We specialize in managing high blood pressure, diabetes, and high cholesterol. We offer same-day appointments and telehealth visits. Most insurance plans accepted.
+• Product: Our pillow uses cooling gel memory foam. It is hypoallergenic and machine washable. Over 10,000 five-star reviews."
       >{{ key_benefits or '' }}</textarea>
 
       <label for="target_audience">
         <span id="label_audience">Target Audience</span>
-        <span class="hint">required</span>
+        <span class="hint">who should watch this video? be specific</span>
       </label>
       <textarea
         id="target_audience"
         name="target_audience"
-        placeholder="e.g. Busy professionals aged 30–45 who struggle with sleep and want a science-backed solution"
+        placeholder="Examples:
+• Families looking for a clean halal restaurant for Friday dinner
+• Adults over 40 managing chronic health conditions
+• Parents shopping for safe, natural products for their children"
         required
       >{{ target_audience or '' }}</textarea>
+
+      <label for="cultural_preference">Cultural / Style Preferences</label>
+      <select id="cultural_preference" name="cultural_preference">
+        <option value="standard">Standard — No special requirements</option>
+        <option value="islamic" {% if cultural_preference == 'islamic' %}selected{% endif %}>Islamic / Halal — Modest dress, no haram imagery</option>
+        <option value="family">Family-Friendly — Clean, wholesome, no adult themes</option>
+        <option value="professional">Professional / Corporate — Formal, minimal lifestyle shots</option>
+      </select>
 
       <label for="tone">Video Tone / Style</label>
       <select id="tone" name="tone">

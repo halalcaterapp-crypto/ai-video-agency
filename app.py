@@ -87,7 +87,8 @@ def generate():
     generate_logo    = request.form.get("generate_logo") == "1"
     business_address = request.form.get("business_address", "").strip()
     business_phone   = request.form.get("business_phone", "").strip()
-    business_website = request.form.get("business_website", "").strip()
+    business_website     = request.form.get("business_website", "").strip()
+    cultural_preference  = request.form.get("cultural_preference", "standard").strip()
 
     # Re-validate token before doing any work
     # "PAID" is the special bypass token for Stripe customers — no DB check needed
@@ -152,6 +153,7 @@ def generate():
             business_address=business_address,
             business_phone=business_phone,
             business_website=business_website,
+            cultural_preference=cultural_preference,
         ),
         daemon=True,
     )

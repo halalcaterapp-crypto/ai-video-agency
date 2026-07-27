@@ -58,6 +58,7 @@ def run(
     business_address: str = "",
     business_phone: str = "",
     business_website: str = "",
+    cultural_preference: str = "standard",
 ) -> dict:
     """Execute the complete pipeline for one client submission."""
     job_dir = _make_job_dir(product_name)
@@ -76,6 +77,7 @@ def run(
             business_address=business_address,
             business_phone=business_phone,
             business_website=business_website,
+            cultural_preference=cultural_preference,
         )
         result["storyboard"] = sb
 

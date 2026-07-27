@@ -336,7 +336,7 @@ Exactly 7 shots. Duration per shot: 5–6 seconds each. Shot 7 must be 6–7 sec
    Shot 7 — CINEMATIC CLOSE: The most beautiful, powerful, or emotionally resonant shot of the entire video. Pure payoff — no selling, no plugging a business. The voiceover_segment for Shot 7 MUST be a closing line of pure storytelling that echoes in the mind after the video ends. ABSOLUTELY NO "visit us", NO business address, NO phone number, NO call-to-action of any kind. Just cinema."""
 
 
-def _build_prompt(business_type: str) -> str:
+def _build_prompt(business_type: str, cultural_preference: str = "standard") -> str:
     """Build the complete director system prompt for the given business type."""
     bt = BUSINESS_TYPES.get(business_type) or BUSINESS_TYPES["general"]
     is_fun = business_type in FUN_TYPES
@@ -361,9 +361,56 @@ def _build_prompt(business_type: str) -> str:
     shot7_rule = _SHOT7_FUN if is_fun else _SHOT7_BUSINESS
     cinematography_rules = _CINEMATOGRAPHY_RULES.replace("{SHOT7_RULE}", shot7_rule)
 
+    # Cultural sensitivity block
+    cultural_block = ""
+    if cultural_preference in ("islamic", "modest"):
+        cultural_block = """
+
+═══════════════════════════════════════════════
+CULTURAL SENSITIVITY — ISLAMIC/HALAL MODE (STRICTLY ENFORCED)
+═══════════════════════════════════════════════
+EVERY higgsfield_prompt in EVERY shot MUST follow these rules without exception:
+• All women wear hijab and loose, full-coverage modest clothing — NO bare arms, legs, neck, or hair visible under any circumstances
+• Men wear modest, conservative full-length clothing — NO bare chest, NO shorts
+• NO physical contact between unrelated men and women (no handshakes, no hugging — maintain clear physical distance)
+• NO alcohol, pork, gambling, or any haram imagery anywhere in any shot
+• Interiors may incorporate Islamic geometric patterns, Arabic calligraphy, or crescent motifs where tasteful
+• Any food shown must appear halal — no pork, no alcohol-based sauces
+• Mixed-gender scenes show men and women in separate areas or with clear respectful distance
+• These constraints override all other visual instructions — apply them to every single shot."""
+
+    # Anti-hallucination block
+    anti_hallucination_block = """
+
+═══════════════════════════════════════════════
+ANTI-HALLUCINATION RULES — NON-NEGOTIABLE
+═══════════════════════════════════════════════
+You may ONLY use facts explicitly stated in the client brief below.
+• NEVER invent prices, statistics, awards, certifications, or testimonials not mentioned
+• NEVER fabricate addresses, phone numbers, websites, or business hours not provided
+• NEVER make up product names, menu items, ingredients, or service features not mentioned
+• NEVER add claims like "serving customers for 20 years", "award-winning", or "best in class" unless the client said so
+• If a detail is not in the brief — leave it out entirely. Do not fill the gap with assumptions.
+• The voiceover must only state things the client explicitly told you."""
+
+    # Visual consistency block
+    consistency_block = """
+
+═══════════════════════════════════════════════
+VISUAL CONSISTENCY ACROSS ALL SHOTS
+═══════════════════════════════════════════════
+If any recurring person, character, or subject appears in multiple shots, they MUST have the EXACT SAME description in every shot:
+• Same clothing color and style (e.g., "navy blue chef coat" — copy this phrase exactly into every shot they appear)
+• Same hair description (e.g., "short dark curly hair" — identical in every shot)
+• Same build and defining feature descriptions
+Establish this "visual anchor" for any recurring subject in Shot 1 and copy it identically into every subsequent shot where they appear. This is what makes the final video look cohesive and professionally produced."""
+
     return f"""{role_intro}
 
 Your job: take this client brief and {job_desc}
+{cultural_block}
+{anti_hallucination_block}
+{consistency_block}
 
 ═══════════════════════════════════════════════
 BUSINESS CATEGORY: {bt['label'].upper()}
@@ -388,6 +435,7 @@ def generate_storyboard(
     business_address: str = "",
     business_phone: str = "",
     business_website: str = "",
+    cultural_preference: str = "standard",
 ) -> dict:
     """
     Call Claude with the director system prompt and client brief.
@@ -426,7 +474,7 @@ def generate_storyboard(
         "Generate a complete video shot list. Output ONLY the raw JSON object."
     )
 
-    system_prompt = _build_prompt(business_type)
+    system_prompt = _build_prompt(business_type, cultural_preference)
     logger.info(
         "Generating storyboard for '%s' [type=%s]...", product_name, business_type
     )
