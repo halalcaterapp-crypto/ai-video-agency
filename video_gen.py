@@ -10,9 +10,12 @@ Polling: uses status_url from response, falls back to /requests/{id}/status
 
 import logging
 import os
+import threading
 import time
-import requests
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+
+import requests
 
 import config
 
@@ -23,7 +26,13 @@ POLL_INTERVAL = 8
 MAX_POLLS = 300        # 40 minutes per job (Higgsfield queue can be slow)
 MAX_SHOT_RETRIES = 2   # retry timed-out shots before failing the pipeline
 MAX_POLL_ERRORS = 5    # consecutive status-endpoint failures before giving up
-SUBMIT_ATTEMPTS = 3    # retries on transient network / 5xx errors at submit time
+SUBMIT_ATTEMPTS = 4    # retries on transient network / 5xx / 429 errors at submit
+
+# Shots are independent Higgsfield jobs, and DoP takes ~6 minutes to render a
+# 5s clip no matter what else is running. Generating them one after another
+# made STEP 3 cost 7x longer than it needed to (~45 min instead of ~7). Run
+# them concurrently instead. Lower this if Higgsfield starts returning 429s.
+MAX_PARALLEL_SHOTS = int(os.getenv("HF_MAX_PARALLEL_SHOTS", "7"))
 
 # Clip length requested from Higgsfield I2V.
 # Storyboards ask for 5-6s per shot (7-8s for the CTA), so a hard 3s cap here
@@ -36,7 +45,9 @@ DURATION_LADDER = [
 MAX_CLIP_SECONDS = DURATION_LADDER[0]
 
 # Set once the API has accepted a length, so later shots skip rejected values.
+# Written from worker threads, so guard it with a lock.
 _accepted_duration = None
+_duration_lock = threading.Lock()
 
 # Suffix appended to prompts on NSFW retry — strips risky language, asserts safety
 _NSFW_SAFE_SUFFIX = (
@@ -144,6 +155,18 @@ def _post_with_retry(url, payload, headers, attempts=SUBMIT_ATTEMPTS):
             return resp.json()
         except (requests.RequestException, ValueError) as exc:
             status = getattr(getattr(exc, "response", None), "status_code", None)
+            # 429 is expected once shots run concurrently -- back off, don't fail.
+            if status == 429:
+                last_err = exc
+                if i < attempts:
+                    wait = 15 * i
+                    logger.warning(
+                        "Higgsfield rate-limited us (attempt %d/%d) -- waiting %ds. "
+                        "Lower HF_MAX_PARALLEL_SHOTS if this repeats.",
+                        i, attempts, wait,
+                    )
+                    time.sleep(wait)
+                continue
             if status is not None and 400 <= status < 500:
                 raise
             last_err = exc
@@ -259,12 +282,13 @@ def _submit_i2v(image_url, prompt, requested_duration):
                 "higgsfield-ai/dop/standard",
                 {"image_url": image_url, "prompt": prompt, "duration": duration},
             )
-            if _accepted_duration != duration:
-                logger.info(
-                    "Higgsfield accepted duration=%ss -- using that for the rest of this run.",
-                    duration,
-                )
-                _accepted_duration = duration
+            with _duration_lock:
+                if _accepted_duration != duration:
+                    logger.info(
+                        "Higgsfield accepted duration=%ss -- using that for the rest of this run.",
+                        duration,
+                    )
+                    _accepted_duration = duration
             return data
         except requests.HTTPError as exc:
             resp = getattr(exc, "response", None)
@@ -334,16 +358,55 @@ def generate_shot_clip(scene_number, prompt, duration_seconds, job_dir,
 
 
 def generate_all_clips(shots, job_dir, cultural_preference="standard"):
-    enriched = []
-    for i, shot in enumerate(shots, start=1):
-        logger.info("Generating clip %d/%d (scene %d)...", i, len(shots), shot["scene_number"])
-        clip_path = generate_shot_clip(
-            scene_number=shot["scene_number"],
-            prompt=shot["higgsfield_prompt"],
-            duration_seconds=shot["duration_seconds"],
-            job_dir=job_dir,
-            cultural_preference=cultural_preference,
-        )
-        enriched.append({**shot, "clip_path": clip_path})
-    logger.info("All %d clips generated successfully.", len(shots))
-    return enriched
+    """Generate every shot clip, running the shots concurrently.
+
+    Each shot is an independent pair of Higgsfield jobs (keyframe, then
+    animation), and DoP spends ~6 minutes on a 5s clip regardless of what else
+    is in flight. Running them sequentially therefore cost roughly
+    len(shots) x 6 minutes; running them together costs about as long as the
+    slowest single shot. Results are returned in storyboard order regardless
+    of the order they finish in.
+    """
+    total = len(shots)
+    workers = max(1, min(MAX_PARALLEL_SHOTS, total))
+    logger.info(
+        "Generating %d clips, up to %d at a time (~the cost of one shot, not %d)...",
+        total, workers, total,
+    )
+
+    results = [None] * total
+    errors = []
+
+    def _one(shot):
+        return {
+            **shot,
+            "clip_path": generate_shot_clip(
+                scene_number=shot["scene_number"],
+                prompt=shot["higgsfield_prompt"],
+                duration_seconds=shot["duration_seconds"],
+                job_dir=job_dir,
+                cultural_preference=cultural_preference,
+            ),
+        }
+
+    with ThreadPoolExecutor(max_workers=workers, thread_name_prefix="shot") as pool:
+        futures = {pool.submit(_one, shot): i for i, shot in enumerate(shots)}
+        completed = 0
+        for fut in as_completed(futures):
+            i = futures[fut]
+            scene = shots[i]["scene_number"]
+            try:
+                results[i] = fut.result()
+                completed += 1
+                logger.info("Progress: %d/%d clips complete (shot %02d done).",
+                            completed, total, scene)
+            except Exception as exc:
+                errors.append((scene, exc))
+                logger.error("Shot %02d failed: %s", scene, exc)
+
+    if errors:
+        detail = "; ".join(f"shot {n}: {e}" for n, e in sorted(errors))
+        raise RuntimeError(f"{len(errors)} of {total} shots failed -- {detail}")
+
+    logger.info("All %d clips generated successfully.", total)
+    return results
