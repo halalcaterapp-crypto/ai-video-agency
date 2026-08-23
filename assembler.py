@@ -18,6 +18,13 @@ TARGET_WIDTH  = 1280
 TARGET_HEIGHT = 720
 TARGET_FPS    = 24
 
+# When the generated footage is shorter than the voiceover we stretch every
+# clip a little rather than freezing the final frame for the whole shortfall.
+# Beyond ~1.35x the motion reads as slow-motion, so anything left over after
+# the stretch still falls through to the last-frame pad below.
+MAX_SLOWDOWN  = 1.35
+TAIL_SECONDS  = 1.5   # held after the voiceover ends
+
 # Use bundled ffmpeg binary from imageio-ffmpeg (no system install needed)
 _FFMPEG_EXE = imageio_ffmpeg.get_ffmpeg_exe()
 logger.info("Using ffmpeg: %s", _FFMPEG_EXE)
@@ -62,24 +69,52 @@ def assemble_video(enriched_shots, voiceover_path, output_path, logo_path=None, 
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     job_dir = str(Path(output_path).parent)
 
-    # Step 1: Normalize each clip to target resolution/fps, trim to duration
+    # Step 0: Measure the voiceover and the raw footage so the shortfall can be
+    # spread across every shot instead of dumped into one long tail freeze.
+    voice_dur = _get_duration(voiceover_path)
+    raw_total = sum(_get_duration(s["clip_path"]) for s in enriched_shots)
+    needed    = voice_dur + TAIL_SECONDS
+
+    stretch = 1.0
+    if raw_total > 0.5 and needed > raw_total:
+        stretch = min(needed / raw_total, MAX_SLOWDOWN)
+        logger.info(
+            "Footage %.1fs vs voiceover %.1fs -- stretching every clip %.2fx "
+            "(absorbs %.1fs of the %.1fs shortfall)",
+            raw_total, voice_dur, stretch,
+            raw_total * (stretch - 1.0), needed - raw_total,
+        )
+    else:
+        logger.info(
+            "Footage %.1fs covers voiceover %.1fs -- no stretch needed.",
+            raw_total, voice_dur,
+        )
+
+    # Step 1: Normalize each clip to target resolution/fps
     normalized = []
     for shot in enriched_shots:
         clip_path  = shot["clip_path"]
-        target_dur = min(float(shot.get("duration_seconds", 3)), 5.0)
         scene_num  = shot["scene_number"]
         out = os.path.join(job_dir, f"norm_{scene_num:02d}.mp4")
 
-        logger.info("Normalizing shot %02d (%.1fs) ...", scene_num, target_dur)
-        _ffmpeg([
-            "-i", clip_path,
-            "-vf", (
-                f"scale={TARGET_WIDTH}:{TARGET_HEIGHT}:"
-                f"force_original_aspect_ratio=decrease,"
-                f"pad={TARGET_WIDTH}:{TARGET_HEIGHT}:(ow-iw)/2:(oh-ih)/2,"
-                f"fps={TARGET_FPS}"
-            ),
-            "-t", str(target_dur),
+        vf = (
+            f"scale={TARGET_WIDTH}:{TARGET_HEIGHT}:"
+            f"force_original_aspect_ratio=decrease,"
+            f"pad={TARGET_WIDTH}:{TARGET_HEIGHT}:(ow-iw)/2:(oh-ih)/2,"
+            f"fps={TARGET_FPS}"
+        )
+        args = ["-i", clip_path]
+        if stretch > 1.01:
+            vf = f"setpts={stretch:.4f}*PTS," + vf
+        args += ["-vf", vf]
+
+        # Only trim when there is surplus footage; never trim while stretching.
+        if stretch <= 1.01:
+            trim_dur = min(float(shot.get("duration_seconds", 5)), 8.0)
+            args += ["-t", str(trim_dur)]
+
+        logger.info("Normalizing shot %02d (stretch %.2fx) ...", scene_num, stretch)
+        _ffmpeg(args + [
             "-an",
             "-c:v", "libx264", "-preset", "fast", "-crf", "23",
             out,
@@ -117,12 +152,12 @@ def assemble_video(enriched_shots, voiceover_path, output_path, logo_path=None, 
         logger.warning("Logo path not found — skipping overlay: %s", logo_path)
         logo_path = None
 
-    # Get durations early so we can pad if voiceover outlasts the video clips
+    # voice_dur was measured in Step 0; only the assembled video needs re-measuring
     video_dur = _get_duration(concat_mp4)
-    voice_dur = _get_duration(voiceover_path)
 
-    # Pad last frame if voiceover is longer than the concatenated clips (prevents CTA cut-off)
-    target_dur = max(video_dur, voice_dur + 1.5)  # 1.5s tail after voiceover ends
+    # Pad last frame if the voiceover still outlasts the stretched clips
+    # (prevents CTA cut-off). After the stretch this is normally < 2s.
+    target_dur = max(video_dur, voice_dur + TAIL_SECONDS)
     if target_dur > video_dur + 0.3:
         extra = target_dur - video_dur
         logger.info(
@@ -175,7 +210,9 @@ def assemble_video(enriched_shots, voiceover_path, output_path, logo_path=None, 
             "-map", "1:a",
             "-c:v", "copy",
             "-c:a", "aac", "-b:a", "192k",
-            "-shortest",
+            # -shortest would cut the padded tail off at the end of the
+            # voiceover; hold the full video length instead.
+            "-t", f"{video_dur:.3f}",
             audio_mixed,
         ], "audio mix")
     logger.info("Audio mixed -> %s", audio_mixed)

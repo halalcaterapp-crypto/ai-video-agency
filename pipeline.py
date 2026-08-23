@@ -93,7 +93,9 @@ def run(
 
         # -- 3. Higgsfield Clip Generation
         logger.info("=== STEP 3: Generating %d video clips ===", len(sb["shots"]))
-        enriched_shots = video_gen.generate_all_clips(sb["shots"], job_dir)
+        enriched_shots = video_gen.generate_all_clips(
+            sb["shots"], job_dir, cultural_preference=cultural_preference
+        )
         logger.info("generate_all_clips returned %s with %s items",
                     type(enriched_shots).__name__,
                     len(enriched_shots) if enriched_shots is not None else "None")

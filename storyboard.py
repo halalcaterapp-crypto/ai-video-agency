@@ -336,6 +336,67 @@ Exactly 7 shots. Duration per shot: 5–6 seconds each. Shot 7 must be 6–7 sec
    Shot 7 — CINEMATIC CLOSE: The most beautiful, powerful, or emotionally resonant shot of the entire video. Pure payoff — no selling, no plugging a business. The voiceover_segment for Shot 7 MUST be a closing line of pure storytelling that echoes in the mind after the video ends. ABSOLUTELY NO "visit us", NO business address, NO phone number, NO call-to-action of any kind. Just cinema."""
 
 
+# Optional cultural / style constraint blocks, injected into the system prompt
+# ONLY when the client explicitly selects that option on the order form.
+# "standard" (the form default) injects nothing at all — a normal order gets a
+# completely unconstrained prompt. Keys must match the <option value=...>
+# entries in templates/form.html.
+_CULTURAL_BLOCKS = {
+    "islamic": """
+
+═══════════════════════════════════════════════
+CULTURAL SENSITIVITY — ISLAMIC/HALAL MODE (STRICTLY ENFORCED)
+═══════════════════════════════════════════════
+EVERY higgsfield_prompt in EVERY shot MUST follow these rules without exception:
+• All women wear hijab and loose, full-coverage modest clothing — NO bare arms, legs, neck, or hair visible under any circumstances
+• Men wear modest, conservative full-length clothing — NO bare chest, NO shorts
+• NO physical contact between unrelated men and women (no handshakes, no hugging — maintain clear physical distance)
+• NO alcohol, pork, gambling, or any haram imagery anywhere in any shot
+• Interiors may incorporate Islamic geometric patterns, Arabic calligraphy, or crescent motifs where tasteful
+• Any food shown must appear halal — no pork, no alcohol-based sauces
+• Mixed-gender scenes show men and women in separate areas or with clear respectful distance
+• These constraints override all other visual instructions — apply them to every single shot.""",
+    "modest": """
+
+═══════════════════════════════════════════════
+CULTURAL SENSITIVITY — ISLAMIC/HALAL MODE (STRICTLY ENFORCED)
+═══════════════════════════════════════════════
+EVERY higgsfield_prompt in EVERY shot MUST follow these rules without exception:
+• All women wear hijab and loose, full-coverage modest clothing — NO bare arms, legs, neck, or hair visible under any circumstances
+• Men wear modest, conservative full-length clothing — NO bare chest, NO shorts
+• NO physical contact between unrelated men and women (no handshakes, no hugging — maintain clear physical distance)
+• NO alcohol, pork, gambling, or any haram imagery anywhere in any shot
+• Interiors may incorporate Islamic geometric patterns, Arabic calligraphy, or crescent motifs where tasteful
+• Any food shown must appear halal — no pork, no alcohol-based sauces
+• Mixed-gender scenes show men and women in separate areas or with clear respectful distance
+• These constraints override all other visual instructions — apply them to every single shot.""",
+    "family": """
+
+═══════════════════════════════════════════════
+CULTURAL SENSITIVITY — FAMILY-FRIENDLY MODE (STRICTLY ENFORCED)
+═══════════════════════════════════════════════
+EVERY higgsfield_prompt in EVERY shot MUST follow these rules without exception:
+• Everyone wears modest everyday clothing — no swimwear, no revealing or form-hugging outfits, no bare midriffs
+• NO alcohol, tobacco, vaping, gambling, or drug references in any shot or on any visible signage
+• NO suggestive posing, flirtation, or romantic physical contact
+• NO violence, weapons, blood, or frightening imagery
+• Keep the mood warm, wholesome and welcoming — the video should be comfortable to watch with young children in the room
+• These constraints override all other visual instructions — apply them to every single shot.""",
+    "professional": """
+
+═══════════════════════════════════════════════
+CULTURAL SENSITIVITY — PROFESSIONAL / CORPORATE MODE (STRICTLY ENFORCED)
+═══════════════════════════════════════════════
+EVERY higgsfield_prompt in EVERY shot MUST follow these rules without exception:
+• Any people shown wear formal business attire — suits, blazers, tailored shirts. No casual wear, no logos on clothing
+• Minimise lifestyle and human-interest shots: lead with the work, the tools, the environment, the results
+• Settings are clean and corporate — offices, boardrooms, labs, workshops. No homes, bars, parties, or beaches
+• NO alcohol, nightlife, or leisure imagery
+• Restrained, credible mood: no exaggerated expressions, no comedic staging, no dramatic emotion
+• These constraints override all other visual instructions — apply them to every single shot.""",
+}
+
+
 def _build_prompt(business_type: str, cultural_preference: str = "standard") -> str:
     """Build the complete director system prompt for the given business type."""
     bt = BUSINESS_TYPES.get(business_type) or BUSINESS_TYPES["general"]
@@ -361,23 +422,10 @@ def _build_prompt(business_type: str, cultural_preference: str = "standard") -> 
     shot7_rule = _SHOT7_FUN if is_fun else _SHOT7_BUSINESS
     cinematography_rules = _CINEMATOGRAPHY_RULES.replace("{SHOT7_RULE}", shot7_rule)
 
-    # Cultural sensitivity block
-    cultural_block = ""
-    if cultural_preference in ("islamic", "modest"):
-        cultural_block = """
-
-═══════════════════════════════════════════════
-CULTURAL SENSITIVITY — ISLAMIC/HALAL MODE (STRICTLY ENFORCED)
-═══════════════════════════════════════════════
-EVERY higgsfield_prompt in EVERY shot MUST follow these rules without exception:
-• All women wear hijab and loose, full-coverage modest clothing — NO bare arms, legs, neck, or hair visible under any circumstances
-• Men wear modest, conservative full-length clothing — NO bare chest, NO shorts
-• NO physical contact between unrelated men and women (no handshakes, no hugging — maintain clear physical distance)
-• NO alcohol, pork, gambling, or any haram imagery anywhere in any shot
-• Interiors may incorporate Islamic geometric patterns, Arabic calligraphy, or crescent motifs where tasteful
-• Any food shown must appear halal — no pork, no alcohol-based sauces
-• Mixed-gender scenes show men and women in separate areas or with clear respectful distance
-• These constraints override all other visual instructions — apply them to every single shot."""
+    # Cultural sensitivity block — empty string for "standard" / anything unknown
+    cultural_block = _CULTURAL_BLOCKS.get((cultural_preference or "").lower().strip(), "")
+    if cultural_block:
+        logger.info("Cultural mode active: %s", cultural_preference)
 
     # Anti-hallucination block
     anti_hallucination_block = """
