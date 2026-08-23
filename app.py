@@ -5,7 +5,9 @@ Routes:
   GET  /               -> sales landing page (pay $14.99 via Stripe)
   GET  /order?token=X  -> client intake form (requires valid single-use token)
   POST /generate       -> validates form + token, starts pipeline, redirects to /success
-  GET  /success        -> confirmation page
+  GET  /status/<job>   -> live progress page, with the download button when ready
+  GET  /api/status/<job> -> JSON the status page polls
+  GET  /success        -> legacy confirmation page
   GET  /download/<job>  -> serve a finished video (link sent in the delivery email)
   GET  /health         -> simple uptime check
   GET  /admin/tokens?key=ADMIN_KEY  -> view all tokens + generate new ones
@@ -13,6 +15,7 @@ Routes:
 """
 
 import glob
+import json
 import logging
 import os
 import re
@@ -144,9 +147,15 @@ def generate():
                                    message="This link was just used by someone else.",
                                    detail="Purchase a video to create more.")
 
+    # Create the job directory up front so the status page exists the moment
+    # the client lands on it.
+    job_id, job_dir = pipeline.new_job(product_name)
+
     thread = threading.Thread(
         target=pipeline.run,
         kwargs=dict(
+            job_id=job_id,
+            job_dir=job_dir,
             product_name=product_name,
             target_audience=target_audience,
             tone=tone or "professional, cinematic, compelling",
@@ -163,10 +172,10 @@ def generate():
         daemon=True,
     )
     thread.start()
-    logger.info("Pipeline thread started for '%s' -> %s (token: %s)",
-                product_name, client_email, token)
+    logger.info("Pipeline thread started for '%s' -> %s (job %s, token: %s)",
+                product_name, client_email, job_id, token)
 
-    return redirect(url_for("success", email=client_email, product=product_name))
+    return redirect(url_for("status_page", job_id=job_id, email=client_email))
 
 
 @app.route("/success", methods=["GET"])
@@ -180,6 +189,66 @@ def success():
 # hex. Anything outside this character set is not one of ours, so reject it
 # rather than letting it near the filesystem.
 _JOB_ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,120}$")
+
+
+def _read_status(job_id):
+    """Assemble the current state of a job from disk. Returns None if unknown."""
+    job_dir = os.path.join(config.BASE_OUTPUT_DIR, job_id)
+    if not os.path.isdir(job_dir):
+        return None
+
+    status = {"state": "queued", "message": "Your brief is in the queue."}
+    try:
+        with open(os.path.join(job_dir, pipeline.STATUS_FILE)) as f:
+            status.update(json.load(f))
+    except (OSError, ValueError):
+        pass   # job dir exists but status not written yet - "queued" is right
+
+    # Clip progress is just a file count, so no plumbing through the worker.
+    status["clips_done"] = len(glob.glob(os.path.join(job_dir, "shot_*", "clip.mp4")))
+    status.setdefault("total_shots", 7)
+
+    # Trust the filesystem over the status file: if the MP4 is there, it's done.
+    if glob.glob(os.path.join(job_dir, "*_final.mp4")) and status["state"] != "done":
+        status["state"] = "done"
+        status["message"] = "Your video is ready."
+        status.setdefault("download_url", f"{config.PUBLIC_BASE_URL}/download/{job_id}")
+
+    status["job_id"] = job_id
+    status["step_index"] = (
+        pipeline.STEPS.index(status["state"]) if status["state"] in pipeline.STEPS
+        else (len(pipeline.STEPS) if status["state"] == "done" else -1)
+    )
+    status["total_steps"] = len(pipeline.STEPS)
+    return status
+
+
+@app.route("/api/status/<job_id>", methods=["GET"])
+def api_status(job_id):
+    """JSON polled by the status page."""
+    if not _JOB_ID_RE.match(job_id):
+        abort(404)
+    status = _read_status(job_id)
+    if status is None:
+        return jsonify({"state": "unknown",
+                        "message": "We can't find that video."}), 404
+    return jsonify(status)
+
+
+@app.route("/status/<job_id>", methods=["GET"])
+def status_page(job_id):
+    """Live progress page - the client's copy of the delivery link."""
+    if not _JOB_ID_RE.match(job_id):
+        abort(404)
+    status = _read_status(job_id)
+    if status is None:
+        return render_template(
+            "token_error.html",
+            message="We can't find that video.",
+            detail="Double-check the link, or reply to your confirmation email.",
+        ), 404
+    return render_template("status.html", status=status,
+                           email=request.args.get("email", ""))
 
 
 @app.route("/download/<job_id>", methods=["GET"])

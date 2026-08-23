@@ -15,6 +15,7 @@ response can return immediately.
 import json
 import logging
 import os
+import time
 import traceback
 import uuid
 from datetime import datetime
@@ -33,6 +34,43 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 logger = logging.getLogger("pipeline")
+
+
+STATUS_FILE = "status.json"
+
+# Ordered so the status page can draw a progress bar without knowing the names.
+STEPS = ["storyboard", "voiceover", "clips", "assembly", "delivery"]
+
+
+def write_status(job_dir: str, state: str, message: str, **extra) -> None:
+    """Record what the pipeline is doing so the client's status page can read it.
+
+    Written atomically - the status page polls this file and must never catch
+    it half-written. Failures here are logged and swallowed: a status file is
+    not worth losing a video over.
+    """
+    payload = {"state": state, "message": message, "updated_at": time.time()}
+    payload.update(extra)
+    path = os.path.join(job_dir, STATUS_FILE)
+    try:
+        tmp = path + ".tmp"
+        with open(tmp, "w") as f:
+            json.dump(payload, f)
+        os.replace(tmp, path)
+    except Exception as exc:
+        logger.warning("Could not write status for %s: %s", job_dir, exc)
+
+
+def new_job(product_name: str):
+    """Create the job directory up front and mark it queued.
+
+    app.py calls this before starting the worker thread so the client can be
+    redirected straight to a status page that already exists.
+    """
+    job_id, job_dir = _make_job_dir(product_name)
+    write_status(job_dir, "queued", "Your brief is in the queue.",
+                 product_name=product_name)
+    return job_id, job_dir
 
 
 def _make_job_dir(product_name: str):
@@ -63,9 +101,14 @@ def run(
     business_phone: str = "",
     business_website: str = "",
     cultural_preference: str = "standard",
+    job_id: str = None,
+    job_dir: str = None,
 ) -> dict:
     """Execute the complete pipeline for one client submission."""
-    job_id, job_dir = _make_job_dir(product_name)
+    if job_id and job_dir:
+        os.makedirs(job_dir, exist_ok=True)
+    else:
+        job_id, job_dir = _make_job_dir(product_name)
     result = {
         "success": False,
         "video_path": None,
@@ -77,6 +120,8 @@ def run(
     try:
         # -- 1. Storyboarding
         logger.info("=== STEP 1: Storyboarding ===")
+        write_status(job_dir, "storyboard", "Writing your script and mapping every shot.",
+                     product_name=product_name)
         sb = storyboard.generate_storyboard(
             product_name, target_audience, tone, key_benefits, business_type,
             business_address=business_address,
@@ -93,11 +138,16 @@ def run(
 
         # -- 2. TTS Voiceover
         logger.info("=== STEP 2: TTS Voiceover ===")
+        write_status(job_dir, "voiceover", "Recording the voiceover narration.",
+                     product_name=product_name, project_title=sb.get("project_title"))
         voiceover_path = os.path.join(job_dir, "voiceover.mp3")
         tts.generate_voiceover(sb["full_voiceover"], voiceover_path)
 
         # -- 3. Higgsfield Clip Generation
         logger.info("=== STEP 3: Generating %d video clips ===", len(sb["shots"]))
+        write_status(job_dir, "clips", "Generating cinematic footage. This is the slow part.",
+                     product_name=product_name, project_title=sb.get("project_title"),
+                     total_shots=len(sb["shots"]))
         enriched_shots = video_gen.generate_all_clips(
             sb["shots"], job_dir, cultural_preference=cultural_preference
         )
@@ -122,6 +172,9 @@ def run(
 
         # -- 4. Video Assembly
         logger.info("=== STEP 4: Assembling final video ===")
+        write_status(job_dir, "assembly", "Stitching the clips, voiceover and music together.",
+                     product_name=product_name, project_title=sb.get("project_title"),
+                     total_shots=len(sb["shots"]))
         safe_title = "".join(
             c if c.isalnum() or c in " _-" else "" for c in sb["project_title"]
         ).strip().replace(" ", "_")[:50]
@@ -140,6 +193,11 @@ def run(
 
         logger.info("=== STEP 5: Sending to %s ===", client_email)
         logger.info("Download link: %s (%.1f MB)", download_url, size_mb)
+        # Mark it ready BEFORE emailing. The video is downloadable either way,
+        # so a dead email provider must never hide a finished video again.
+        write_status(job_dir, "done", "Your video is ready.",
+                     product_name=product_name, project_title=sb.get("project_title"),
+                     download_url=download_url, size_mb=round(size_mb, 1))
         sent = email_sender.send_video_to_client(
             to_email=client_email,
             product_name=product_name,
@@ -164,6 +222,9 @@ def run(
         tb = traceback.format_exc()
         logger.error("Pipeline failed:\n%s", tb)
         result["error"] = str(exc)
+        write_status(job_dir, "failed",
+                     "Something went wrong while producing this video.",
+                     product_name=product_name, error=str(exc)[:300])
         # Notify the client so they're not left waiting forever
         try:
             email_sender.send_failure_notice(client_email, product_name)

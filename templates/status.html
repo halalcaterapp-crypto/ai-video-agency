@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your video — SwiftAI Videos</title>
+<style>
+  :root {
+    --bg:#0b0b12; --card:#15151f; --line:#26263a; --text:#f2f2f7;
+    --muted:#9a9ab0; --accent:#7c6cf0; --accent-2:#a48bff; --ok:#3ecf8e; --bad:#ff6b6b;
+  }
+  * { box-sizing:border-box; }
+  body {
+    margin:0; padding:32px 16px; background:var(--bg); color:var(--text);
+    font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  .card {
+    max-width:560px; margin:0 auto; background:var(--card);
+    border:1px solid var(--line); border-radius:16px; overflow:hidden;
+  }
+  .head {
+    background:linear-gradient(135deg,#0f0f0f 0%,#1f1b3a 100%);
+    padding:36px 32px; text-align:center; border-bottom:1px solid var(--line);
+  }
+  .head h1 { margin:0; font-size:26px; letter-spacing:-.02em; }
+  .head p { margin:8px 0 0; color:var(--muted); font-size:14px; }
+  .body { padding:28px 32px 32px; }
+  .title { font-size:19px; font-weight:700; margin:0 0 4px; }
+  .msg { color:var(--muted); margin:0 0 24px; }
+
+  .bar { height:6px; background:#20202f; border-radius:99px; overflow:hidden; margin-bottom:24px; }
+  .bar span {
+    display:block; height:100%; border-radius:99px;
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    transition:width .6s ease;
+  }
+  ol { list-style:none; margin:0; padding:0; }
+  li { display:flex; gap:12px; align-items:flex-start; padding:9px 0; color:var(--muted); }
+  li .dot {
+    flex:0 0 22px; height:22px; border-radius:50%; background:#20202f;
+    border:1px solid var(--line); display:grid; place-items:center;
+    font-size:11px; font-weight:700; color:var(--muted); margin-top:1px;
+  }
+  li.done { color:var(--text); }
+  li.done .dot { background:var(--ok); border-color:var(--ok); color:#06281a; }
+  li.active { color:var(--text); font-weight:600; }
+  li.active .dot {
+    background:var(--accent); border-color:var(--accent); color:#fff;
+    animation:pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.45} }
+
+  .cta {
+    display:block; text-align:center; text-decoration:none; margin-top:8px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#fff;
+    padding:17px 24px; border-radius:10px; font-weight:700; font-size:17px;
+  }
+  .note { color:var(--muted); font-size:13px; margin-top:18px; text-align:center; }
+  .fail { color:var(--bad); }
+  .hint { margin-top:22px; padding-top:18px; border-top:1px solid var(--line);
+          color:var(--muted); font-size:13px; }
+  code { background:#20202f; padding:2px 6px; border-radius:5px; font-size:12px;
+         word-break:break-all; }
+  @media (max-width:520px){ .head,.body{padding-left:20px;padding-right:20px;} }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="head">
+    <h1 id="heading">🎬 Your video is in production</h1>
+    <p id="sub">SwiftAI Videos</p>
+  </div>
+  <div class="body">
+    <p class="title" id="title">{{ status.project_title or status.product_name or 'Your video' }}</p>
+    <p class="msg" id="msg">{{ status.message }}</p>
+
+    <div class="bar"><span id="fill" style="width:0%"></span></div>
+
+    <ol id="steps">
+      <li data-step="0"><span class="dot">1</span><span>Script &amp; storyboard</span></li>
+      <li data-step="1"><span class="dot">2</span><span>Voiceover narration</span></li>
+      <li data-step="2"><span class="dot">3</span><span id="clipstep">Cinematic footage</span></li>
+      <li data-step="3"><span class="dot">4</span><span>Assembly</span></li>
+      <li data-step="4"><span class="dot">5</span><span>Delivery</span></li>
+    </ol>
+
+    <div id="ready" style="display:none">
+      <a class="cta" id="dl" href="#">Download your video</a>
+      <p class="note">Save the file somewhere safe once it's downloaded.</p>
+    </div>
+
+    <p class="note" id="waiting">This page updates itself — keep it open, or come back to it later.</p>
+
+    <div class="hint">
+      Bookmark this page. It's your permanent link to this video:<br>
+      <code id="permalink"></code>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var JOB = {{ status.job_id | tojson }};
+  var els = {
+    heading: document.getElementById('heading'), title: document.getElementById('title'),
+    msg: document.getElementById('msg'), fill: document.getElementById('fill'),
+    ready: document.getElementById('ready'), dl: document.getElementById('dl'),
+    waiting: document.getElementById('waiting'), clipstep: document.getElementById('clipstep'),
+    steps: document.querySelectorAll('#steps li')
+  };
+  document.getElementById('permalink').textContent = window.location.href.split('?')[0];
+
+  function render(s) {
+    els.msg.textContent = s.message || '';
+    if (s.project_title || s.product_name) {
+      els.title.textContent = s.project_title || s.product_name;
+    }
+
+    var idx = typeof s.step_index === 'number' ? s.step_index : -1;
+    var total = s.total_steps || 5;
+
+    if (s.state === 'clips' && s.total_shots) {
+      els.clipstep.textContent = 'Cinematic footage — ' +
+        (s.clips_done || 0) + ' of ' + s.total_shots + ' shots';
+    }
+
+    els.steps.forEach(function (li) {
+      var n = parseInt(li.dataset.step, 10);
+      li.className = idx > n || s.state === 'done' ? 'done' : (idx === n ? 'active' : '');
+    });
+
+    var pct = s.state === 'done' ? 100 : Math.max(4, (Math.max(idx, 0) / total) * 100);
+    if (s.state === 'clips' && s.total_shots) {
+      pct = ((2 + (s.clips_done || 0) / s.total_shots) / total) * 100;
+    }
+    els.fill.style.width = pct + '%';
+
+    if (s.state === 'done' && s.download_url) {
+      els.heading.textContent = '✅ Your video is ready';
+      els.dl.href = s.download_url;
+      els.dl.textContent = 'Download your video' + (s.size_mb ? ' (' + s.size_mb + ' MB)' : '');
+      els.ready.style.display = 'block';
+      els.waiting.style.display = 'none';
+      return true;
+    }
+    if (s.state === 'failed') {
+      els.heading.textContent = '⚠️ Production delay';
+      els.msg.className = 'msg fail';
+      els.waiting.textContent = "Our team has been notified and will reprocess your order.";
+      return true;
+    }
+    return false;
+  }
+
+  render({{ status | tojson }});
+
+  var delay = 5000;
+  (function poll() {
+    fetch('/api/status/' + encodeURIComponent(JOB), { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (s) {
+        if (s && render(s)) return;            // finished - stop polling
+        delay = Math.min(delay * 1.15, 30000); // ease off on long jobs
+        setTimeout(poll, delay);
+      })
+      .catch(function () { setTimeout(poll, 15000); });
+  })();
+})();
+</script>
+</body>
+</html>
