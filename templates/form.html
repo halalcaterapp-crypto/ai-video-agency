@@ -342,6 +342,16 @@
         </label>
 
         <label class="biz-card">
+          <input type="radio" name="business_type" value="cafe"
+            {% if business_type == 'cafe' %}checked{% endif %}
+            onchange="onBizChange(this.value)" />
+          <div class="biz-card-inner">
+            <span class="biz-icon">☕</span>
+            <span class="biz-label">Café<br>&amp; Coffee</span>
+          </div>
+        </label>
+
+        <label class="biz-card">
           <input type="radio" name="business_type" value="fitness"
             {% if business_type == 'fitness' %}checked{% endif %}
             onchange="onBizChange(this.value)" />
@@ -642,6 +652,11 @@
         name:     'e.g. Casa Fuego Modern Mexican Kitchen',
         benefits: 'e.g. Scratch-made sauces daily, locally sourced produce, wood-fired meats, voted Best New Restaurant 2024',
         audience: 'e.g. Foodies and families in the area looking for an authentic, exciting dining experience'
+      },
+      cafe: {
+        name:     'e.g. MOTW Coffee & Snacks',
+        benefits: 'e.g. Single-origin espresso, house-made chai, iced lattes, fresh pastries, quiet seating and free wifi',
+        audience: 'e.g. Students, remote workers and neighbours looking for a relaxed local coffee spot'
       },
       fitness: {
         name:     'e.g. Peak Performance Gym & Training',

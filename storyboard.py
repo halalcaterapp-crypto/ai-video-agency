@@ -89,6 +89,18 @@ Shot 5 — FINAL PRESENTATION: The hero dish or a spread of signature items in p
         "prominence": "Food is the absolute hero in every shot. Restaurant environment supports the food. Hands are acceptable in cooking shots but no faces — let the food do all the talking.",
     },
 
+    "cafe": {
+        "label": "Café & Coffee Shop",
+        "subject": "Café / Coffee Shop",
+        "shots": """\
+Shot 1 — THE POUR: Extreme close-up of espresso pulling from the portafilter into a warm ceramic cup, crema blooming on the surface, backlit so the stream glows. Machine and cup only, no faces.
+Shot 2 — LATTE ART: Overhead shot of steamed milk being poured into espresso, a rosetta or heart forming in the surface of the drink. Hands and pitcher only, no faces.
+Shot 3 — THE COUNTER: The pastry and snack case in warm morning light — croissants, cookies, muffins and wrapped snacks behind clean glass, styled and inviting. Product detail only, no faces.
+Shot 4 — COLD DRINKS: An iced coffee or cold drink built over fresh ice, condensation beading down the glass, syrup or milk swirling through in slow motion. Pure drink beauty shot.
+Shot 5 — THE ROOM: The seating area at its most inviting — warm pendant lighting, a window seat, a mug and a laptop on a wooden table, plants, the space calm and lived-in. Wide atmospheric shot, no faces.""",
+        "voiceover": "Warm, unhurried and sensory. Speak to aroma, warmth, ritual, and the feeling of finding your regular spot. Close with a simple invitation to come in.",
+        "prominence": "The drinks and the room are the heroes. This is a café, NOT a restaurant — never show plated dinner entrées, steak, pasta, fine-dining presentation or table service. Hands are acceptable at the espresso machine but no faces.",
+    },
     "fitness": {
         "label": "Fitness & Wellness",
         "subject": "Gym / Studio / Service",

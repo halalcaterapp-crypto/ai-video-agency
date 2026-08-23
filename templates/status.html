@@ -119,7 +119,9 @@
     var idx = typeof s.step_index === 'number' ? s.step_index : -1;
     var total = s.total_steps || 5;
 
-    if (s.state === 'clips' && s.total_shots) {
+    // Keep the count correct after the job finishes too - it used to freeze on
+    // whatever the last 'clips' poll happened to see (e.g. "6 of 7").
+    if (s.total_shots && (s.state === 'clips' || s.state === 'done')) {
       els.clipstep.textContent = 'Cinematic footage — ' +
         (s.clips_done || 0) + ' of ' + s.total_shots + ' shots';
     }

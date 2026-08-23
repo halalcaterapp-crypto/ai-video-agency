@@ -23,6 +23,13 @@ TARGET_FPS    = 24
 # Beyond ~1.35x the motion reads as slow-motion, so anything left over after
 # the stretch still falls through to the last-frame pad below.
 MAX_SLOWDOWN  = 1.35
+
+# The reverse case: TTS reads faster than the storyboard's own duration
+# estimates, so 7 shots can total ~38s against a ~27s voiceover, leaving ten
+# seconds of footage playing after the narration has finished. Trim every clip
+# proportionally instead of letting the tail run - but never below this
+# fraction of its length, or the cuts start to feel frantic.
+MIN_SHRINK    = 0.6
 TAIL_SECONDS  = 1.5   # held after the voiceover ends
 
 # Use bundled ffmpeg binary from imageio-ffmpeg (no system install needed)
@@ -71,24 +78,38 @@ def assemble_video(enriched_shots, voiceover_path, output_path, logo_path=None, 
 
     # Step 0: Measure the voiceover and the raw footage so the shortfall can be
     # spread across every shot instead of dumped into one long tail freeze.
-    voice_dur = _get_duration(voiceover_path)
-    raw_total = sum(_get_duration(s["clip_path"]) for s in enriched_shots)
-    needed    = voice_dur + TAIL_SECONDS
+    voice_dur    = _get_duration(voiceover_path)
+    clip_lengths = {s["scene_number"]: _get_duration(s["clip_path"])
+                    for s in enriched_shots}
+    raw_total    = sum(clip_lengths.values())
+    needed       = voice_dur + TAIL_SECONDS
 
     stretch = 1.0
-    if raw_total > 0.5 and needed > raw_total:
-        stretch = min(needed / raw_total, MAX_SLOWDOWN)
-        logger.info(
-            "Footage %.1fs vs voiceover %.1fs -- stretching every clip %.2fx "
-            "(absorbs %.1fs of the %.1fs shortfall)",
-            raw_total, voice_dur, stretch,
-            raw_total * (stretch - 1.0), needed - raw_total,
-        )
+    shrink  = 1.0
+    if raw_total > 0.5:
+        ratio = needed / raw_total
+        if ratio > 1.01:
+            stretch = min(ratio, MAX_SLOWDOWN)
+            logger.info(
+                "Footage %.1fs vs voiceover %.1fs -- stretching every clip %.2fx "
+                "(absorbs %.1fs of the %.1fs shortfall)",
+                raw_total, voice_dur, stretch,
+                raw_total * (stretch - 1.0), needed - raw_total,
+            )
+        elif ratio < 0.95:
+            shrink = max(ratio, MIN_SHRINK)
+            logger.info(
+                "Footage %.1fs overruns voiceover %.1fs by %.1fs -- trimming every "
+                "clip to %.0f%% so the video ends with the narration.",
+                raw_total, voice_dur, raw_total - needed, shrink * 100,
+            )
+        else:
+            logger.info(
+                "Footage %.1fs matches voiceover %.1fs -- no adjustment needed.",
+                raw_total, voice_dur,
+            )
     else:
-        logger.info(
-            "Footage %.1fs covers voiceover %.1fs -- no stretch needed.",
-            raw_total, voice_dur,
-        )
+        logger.warning("Could not measure clip durations -- assembling as-is.")
 
     # Step 1: Normalize each clip to target resolution/fps
     normalized = []
@@ -108,8 +129,12 @@ def assemble_video(enriched_shots, voiceover_path, output_path, logo_path=None, 
             vf = f"setpts={stretch:.4f}*PTS," + vf
         args += ["-vf", vf]
 
-        # Only trim when there is surplus footage; never trim while stretching.
-        if stretch <= 1.01:
+        # Trim only when there is surplus footage; never trim while stretching.
+        if shrink < 0.99:
+            # Proportional trim so every shot survives, just a little shorter.
+            trim_dur = max(1.2, clip_lengths.get(scene_num, 5.0) * shrink)
+            args += ["-t", f"{trim_dur:.3f}"]
+        elif stretch <= 1.01:
             trim_dur = min(float(shot.get("duration_seconds", 5)), 8.0)
             args += ["-t", str(trim_dur)]
 
