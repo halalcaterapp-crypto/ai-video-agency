@@ -35,15 +35,19 @@ logging.basicConfig(
 logger = logging.getLogger("pipeline")
 
 
-def _make_job_dir(product_name: str) -> str:
-    """Create and return a unique working directory for this pipeline run."""
+def _make_job_dir(product_name: str):
+    """Create a unique working directory for this run. Returns (job_id, job_dir).
+
+    The job id is also the download-link slug, so the random part is 16 hex
+    characters rather than 6 - a link nobody should be able to guess.
+    """
     slug = "".join(c if c.isalnum() else "_" for c in product_name)[:30]
     timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-    job_id = f"{slug}_{timestamp}_{uuid.uuid4().hex[:6]}"
+    job_id = f"{slug}_{timestamp}_{uuid.uuid4().hex[:16]}"
     job_dir = os.path.join(config.BASE_OUTPUT_DIR, job_id)
     os.makedirs(job_dir, exist_ok=True)
     logger.info("Job directory: %s", job_dir)
-    return job_dir
+    return job_id, job_dir
 
 
 def run(
@@ -61,10 +65,11 @@ def run(
     cultural_preference: str = "standard",
 ) -> dict:
     """Execute the complete pipeline for one client submission."""
-    job_dir = _make_job_dir(product_name)
+    job_id, job_dir = _make_job_dir(product_name)
     result = {
         "success": False,
         "video_path": None,
+        "download_url": None,
         "storyboard": None,
         "error": None,
     }
@@ -128,18 +133,30 @@ def run(
         )
         result["video_path"] = final_path
 
-        # -- 5. Email Delivery
+        # -- 5. Email Delivery (a download link, not a 10 MB attachment)
+        download_url = f"{config.PUBLIC_BASE_URL}/download/{job_id}"
+        size_mb = os.path.getsize(final_path) / (1024 * 1024)
+        result["download_url"] = download_url
+
         logger.info("=== STEP 5: Sending to %s ===", client_email)
+        logger.info("Download link: %s (%.1f MB)", download_url, size_mb)
         sent = email_sender.send_video_to_client(
             to_email=client_email,
             product_name=product_name,
             project_title=sb["project_title"],
             video_path=final_path,
+            download_url=download_url,
+            size_mb=size_mb,
         )
         if not sent:
-            logger.error("Email delivery failed -- video is still at %s", final_path)
+            # The file is on the volume and the link works regardless, so this
+            # is recoverable now - hand the client the URL below by hand.
+            logger.error(
+                "Email delivery failed -- video is still downloadable at %s",
+                download_url,
+            )
         else:
-            logger.info("Pipeline complete! Video delivered to %s", client_email)
+            logger.info("Pipeline complete! Link delivered to %s", client_email)
 
         result["success"] = True
 

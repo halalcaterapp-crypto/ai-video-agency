@@ -6,16 +6,21 @@ Routes:
   GET  /order?token=X  -> client intake form (requires valid single-use token)
   POST /generate       -> validates form + token, starts pipeline, redirects to /success
   GET  /success        -> confirmation page
+  GET  /download/<job>  -> serve a finished video (link sent in the delivery email)
   GET  /health         -> simple uptime check
   GET  /admin/tokens?key=ADMIN_KEY  -> view all tokens + generate new ones
   POST /admin/generate?key=ADMIN_KEY -> generate N new tokens
 """
 
+import glob
 import logging
 import os
+import re
 import threading
 import uuid
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import (
+    Flask, render_template, request, redirect, url_for, jsonify, send_file, abort
+)
 import config
 import pipeline
 import tokens as token_store
@@ -169,6 +174,40 @@ def success():
     email   = request.args.get("email", "your inbox")
     product = request.args.get("product", "your product")
     return render_template("success.html", email=email, product=product)
+
+
+# Job directories are built by pipeline._make_job_dir: slug + timestamp + random
+# hex. Anything outside this character set is not one of ours, so reject it
+# rather than letting it near the filesystem.
+_JOB_ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,120}$")
+
+
+@app.route("/download/<job_id>", methods=["GET"])
+def download(job_id):
+    """Serve the finished MP4 for a job. This is the link emailed to clients."""
+    if not _JOB_ID_RE.match(job_id):
+        abort(404)
+
+    job_dir = os.path.join(config.BASE_OUTPUT_DIR, job_id)
+    matches = sorted(glob.glob(os.path.join(job_dir, "*_final.mp4")))
+    if not matches:
+        logger.warning("Download miss for job '%s' (looked in %s)", job_id, job_dir)
+        return render_template(
+            "token_error.html",
+            message="This video is no longer available.",
+            detail="Download links expire when a video is cleaned up. "
+                   "Reply to your delivery email and we'll re-send it.",
+        ), 404
+
+    video = matches[0]
+    logger.info("Serving download: %s (%.1f MB)",
+                video, os.path.getsize(video) / (1024 * 1024))
+    return send_file(
+        video,
+        mimetype="video/mp4",
+        as_attachment=True,
+        download_name=os.path.basename(video),
+    )
 
 
 @app.route("/health", methods=["GET"])
