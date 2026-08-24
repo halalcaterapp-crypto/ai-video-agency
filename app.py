@@ -4,7 +4,8 @@ app.py — Flask web server.
 Routes:
   GET  /               -> sales landing page (pay $14.99 via Stripe)
   GET  /order?token=X  -> client intake form (requires valid single-use token)
-  POST /generate       -> validates form + token, starts pipeline, redirects to /success
+  GET  /paid?session_id -> post-checkout form, gated on a verified Stripe payment
+  POST /generate       -> validates form + token, starts pipeline, redirects to /status
   GET  /status/<job>   -> live progress page, with the download button when ready
   GET  /api/status/<job> -> JSON the status page polls
   GET  /success        -> legacy confirmation page
@@ -25,7 +26,9 @@ from flask import (
     Flask, render_template, request, redirect, url_for, jsonify, send_file, abort
 )
 import config
+import payments
 import pipeline
+import tiers
 import tokens as token_store
 
 logging.basicConfig(
@@ -64,7 +67,13 @@ def order():
     status = token_store.validate_token(token)
 
     if status == "valid":
-        return render_template("form.html", token=token)
+        tier = token_store.tier_for_token(token) or tiers.BUSINESS
+        return render_template(
+            "form.html", token=token, tier=tier,
+            default_type=tiers.default_type(tier),
+            tier_price=tiers.price_display(tier),
+            tier_label=tiers.label(tier),
+        )
     elif status == "used":
         return render_template("token_error.html",
                                message="This link has already been used.",
@@ -79,8 +88,48 @@ def order():
 
 @app.route("/paid", methods=["GET"])
 def paid():
-    """Entry point for customers who paid via Stripe — no token required."""
-    return render_template("form.html", token="PAID")
+    """Post-checkout form. Open only to a Stripe session that was really paid.
+
+    This route used to render the form for anyone who typed the URL, which
+    meant unlimited free videos to anyone who knew the path. It now asks
+    Stripe whether the session was paid, and derives the tier from the amount
+    so it cannot be forged.
+    """
+    session_id = request.args.get("session_id", "").strip()
+    try:
+        info = payments.verify_session(session_id)
+    except payments.PaymentError as exc:
+        logger.warning("Blocked /paid (%s): %s", session_id[:24] or "no session", exc)
+        return render_template(
+            "token_error.html",
+            message="We couldn't verify that payment.",
+            detail=f"{exc} If you were charged, reply to your Stripe receipt "
+                   "and we'll get your video sorted.",
+        ), 402
+
+    tier = tiers.tier_for_amount(info["amount_total"])
+    token, state = token_store.token_for_session(info["session_id"], tier)
+
+    if state == "used":
+        return render_template(
+            "token_error.html",
+            message="This purchase has already been used.",
+            detail="Each purchase produces one video. Grab another to make a new one.",
+        ), 409
+
+    logger.info(
+        "Checkout verified: tier=%s (%s), state=%s, session=%s",
+        tier, tiers.price_display(tier), state, info["session_id"][:24],
+    )
+    return render_template(
+        "form.html",
+        token=token,
+        tier=tier,
+        default_type=tiers.default_type(tier),
+        tier_price=tiers.price_display(tier),
+        tier_label=tiers.label(tier),
+        client_email=info.get("email", ""),
+    )
 
 
 @app.route("/generate", methods=["POST"])
@@ -98,14 +147,25 @@ def generate():
     business_website     = request.form.get("business_website", "").strip()
     cultural_preference  = request.form.get("cultural_preference", "standard").strip()
 
-    # Re-validate token before doing any work
-    # "PAID" is the special bypass token for Stripe customers — no DB check needed
-    if token != "PAID":
-        token_status = token_store.validate_token(token)
-        if token_status != "valid":
-            return render_template("token_error.html",
-                                   message="This link has already been used or is invalid.",
-                                   detail="Purchase a video to create more.")
+    # Re-validate the token before doing any work. There is no bypass value:
+    # the old "PAID" magic string let anyone skip this entirely.
+    token_status = token_store.validate_token(token)
+    if token_status != "valid":
+        return render_template("token_error.html",
+                               message="This link has already been used or is invalid.",
+                               detail="Purchase a video to create more."), 403
+
+    # Tier is read from the token, never from the form. Tokens issued by the
+    # admin page predate tiers and carry NULL -- treat those as full access.
+    tier = token_store.tier_for_token(token) or tiers.BUSINESS
+    if not tiers.allows(tier, business_type):
+        logger.warning("Tier %s attempted business_type=%s", tier, business_type)
+        return render_template(
+            "token_error.html",
+            message="That category needs the Business plan.",
+            detail="Your Personal & Creative purchase covers fun, school and college "
+                   "videos. Commercials for a business are $39.99.",
+        ), 403
 
     errors = []
     if not product_name:
@@ -117,6 +177,10 @@ def generate():
 
     if errors:
         return render_template("form.html", errors=errors, token=token,
+                               tier=tier,
+                               default_type=tiers.default_type(tier),
+                               tier_price=tiers.price_display(tier),
+                               tier_label=tiers.label(tier),
                                product_name=product_name,
                                target_audience=target_audience,
                                tone=tone,
@@ -138,14 +202,12 @@ def generate():
         logger.info("Logo uploaded -> %s", logo_path)
         generate_logo = False
 
-    # Consume token atomically — prevents double-submission
-    # PAID token bypasses DB entirely (Stripe customers)
-    if token != "PAID":
-        consumed = token_store.consume_token(token, client_email)
-        if not consumed:
-            return render_template("token_error.html",
-                                   message="This link was just used by someone else.",
-                                   detail="Purchase a video to create more.")
+    # Consume the token atomically -- prevents double-submission and makes the
+    # Stripe session single-use.
+    if not token_store.consume_token(token, client_email):
+        return render_template("token_error.html",
+                               message="This link was just used.",
+                               detail="Each purchase produces one video."), 409
 
     # Create the job directory up front so the status page exists the moment
     # the client lands on it.

@@ -17,6 +17,10 @@ OPENAI_API_KEY    = os.getenv("OPENAI_API_KEY", "")
 # Resend replaces it: free tier covers 3,000 emails/month.
 RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
 
+# Stripe. The secret key is what lets the app ask Stripe whether a checkout
+# session was really paid, instead of trusting its own URL.
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "").strip()
+
 # Higgsfield - support both naming conventions
 HIGGSFIELD_API_KEY    = os.getenv("HIGGSFIELD_API_KEY") or os.getenv("HF_API_KEY", "")
 HIGGSFIELD_API_SECRET = os.getenv("HIGGSFIELD_API_SECRET") or os.getenv("HF_API_SECRET", "")

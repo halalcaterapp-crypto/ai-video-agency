@@ -285,15 +285,17 @@
 
       <!-- ── STEP 1: Business Type ── -->
       <div class="section-label">
-        What type of business is this for?
+        {% if tier == 'personal' %}What kind of video are you making?
+        {% else %}What type of business is this for?{% endif %}
         <span class="hint">select one — shapes the entire video style</span>
       </div>
 
       <div class="biz-grid">
 
+        {% if tier != 'personal' %}
         <label class="biz-card">
           <input type="radio" name="business_type" value="product"
-            {% if (business_type or 'product') == 'product' %}checked{% endif %}
+            {% if (business_type or default_type or 'product') == 'product' %}checked{% endif %}
             onchange="onBizChange(this.value)" />
           <div class="biz-card-inner">
             <span class="biz-icon">📦</span>
@@ -421,6 +423,7 @@
           </div>
         </label>
 
+        {% endif %}
         <!-- ── Creative & Fun ── -->
         <div class="biz-divider">Creative &amp; Fun</div>
 
@@ -465,8 +468,18 @@
         </label>
 
         <label class="biz-card">
+          <input type="radio" name="business_type" value="school"
+            {% if business_type == 'school' %}checked{% endif %}
+            onchange="onBizChange(this.value)" />
+          <div class="biz-card-inner">
+            <span class="biz-icon">🎓</span>
+            <span class="biz-label">School &amp;<br>Class Project</span>
+          </div>
+        </label>
+
+        <label class="biz-card">
           <input type="radio" name="business_type" value="cinematic"
-            {% if business_type == 'cinematic' %}checked{% endif %}
+            {% if (business_type or default_type) == 'cinematic' %}checked{% endif %}
             onchange="onBizChange(this.value)" />
           <div class="biz-card-inner">
             <span class="biz-icon">🎬</span>
@@ -658,6 +671,11 @@
         benefits: 'e.g. Single-origin espresso, house-made chai, iced lattes, fresh pastries, quiet seating and free wifi',
         audience: 'e.g. Students, remote workers and neighbours looking for a relaxed local coffee spot'
       },
+      school: {
+        name:     'e.g. The Water Cycle — 7th Grade Science',
+        benefits: 'e.g. Explains evaporation, condensation and precipitation for a middle-school class, with a diagram of each stage',
+        audience: 'e.g. My science class and teacher'
+      },
       fitness: {
         name:     'e.g. Peak Performance Gym & Training',
         benefits: 'e.g. Expert personal trainers, state-of-the-art equipment, small-group classes, no-contract memberships',
@@ -722,7 +740,7 @@
       }
     };
 
-    var FUN_TYPES = ['fantasy', 'space', 'nature', 'kids', 'cinematic'];
+    var FUN_TYPES = ['fantasy', 'space', 'nature', 'kids', 'cinematic', 'school'];
 
     function onBizChange(val) {
       var hints = BIZ_HINTS[val] || BIZ_HINTS['general'];

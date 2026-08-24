@@ -194,6 +194,18 @@ Shot 5 — BRAND CLOSE: A confident, aspirational wide shot of the full business
 
     # ── CREATIVE & FUN CATEGORIES ─────────────────────────────────────────────
 
+    "school": {
+        "label": "School & Class Project",
+        "subject": "School / Class Project",
+        "shots": """\
+Shot 1 — TITLE MOMENT: A clean, bold opening image that announces the subject of the project — one striking central visual, bright and confident, with clear space around it.
+Shot 2 — THE SUBJECT: The main topic rendered clearly and accurately — the object, place, organism, experiment or historical scene at the heart of the project.
+Shot 3 — DETAIL OR PROCESS: A closer look at how it works or what it is made of — a cross-section, a step in a process, a moment of change, rendered like a good textbook illustration brought to life.
+Shot 4 — CONTEXT: The subject in its wider setting — the environment, the era, the landscape, the laboratory — showing where it belongs and why it matters.
+Shot 5 — CONCLUSION: A memorable closing image that leaves the viewer holding the main idea. Wide, clear and satisfying.""",
+        "voiceover": "Clear, confident and age-appropriate for a classroom audience. Explain, never sell. Short sentences, plain words, one idea at a time. Close by restating the main point in a single line.",
+        "prominence": "Accuracy and clarity matter more than spectacle. NO brand names, NO logos, NO sales language and NO call to action — this is a school project, not an advertisement.",
+    },
     "fantasy": {
         "label": "Fantasy & Adventure",
         "subject": "Story / World",
@@ -261,7 +273,7 @@ Shot 5 — RESONANT CLOSE: A final image that stays with the viewer long after i
 }
 
 # Creative/fun types that use storytelling narration instead of commercial CTA
-FUN_TYPES = {"fantasy", "space", "nature", "kids", "cinematic"}
+FUN_TYPES = {"fantasy", "space", "nature", "kids", "cinematic", "school"}
 
 # ─────────────────────────────────────────────────────────────────────────────
 # STATIC CINEMATOGRAPHY RULES (shared across all business types)

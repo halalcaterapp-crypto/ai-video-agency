@@ -5,9 +5,12 @@ Uses PostgreSQL when DATABASE_URL is set (Railway production).
 Falls back to SQLite for local development.
 """
 
+import logging
 import os
 import secrets
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
 
@@ -31,7 +34,7 @@ else:
 
 # ── Schema ─────────────────────────────────────────────────────────────────────
 def init_db():
-    """Create the tokens table if it doesn't exist."""
+    """Create the tokens table if it doesn't exist, and add newer columns."""
     with _conn() as db:
         cur = db.cursor()
         cur.execute("""
@@ -43,6 +46,23 @@ def init_db():
                 status        TEXT NOT NULL DEFAULT 'unused'
             )
         """)
+        # Added when two-tier pricing arrived. Existing rows predate Stripe
+        # verification and simply carry NULLs.
+        for ddl in (
+            "ALTER TABLE tokens ADD COLUMN tier TEXT",
+            "ALTER TABLE tokens ADD COLUMN stripe_session_id TEXT",
+        ):
+            try:
+                cur.execute(ddl)
+            except Exception:
+                db.rollback() if hasattr(db, "rollback") else None
+        try:
+            cur.execute(
+                "CREATE UNIQUE INDEX IF NOT EXISTS idx_tokens_session "
+                "ON tokens (stripe_session_id)"
+            )
+        except Exception:
+            pass
         db.commit()
 
 
@@ -110,3 +130,65 @@ def list_tokens() -> list:
             "FROM tokens ORDER BY created_at DESC"
         )
         return cur.fetchall()
+
+
+def token_for_session(session_id: str, tier: str) -> tuple:
+    """
+    Return (token, state) for a verified Stripe Checkout Session.
+
+    One purchase buys one video, so the session id is the unit of entitlement:
+      'new'      first arrival - a token was minted
+      'existing' they refreshed or came back before submitting - same token
+      'used'     that purchase already produced a video - refuse
+
+    Keyed on stripe_session_id with a unique index, so a replayed success URL
+    can never mint a second token.
+    """
+    init_db()
+    with _conn() as db:
+        cur = db.cursor()
+        cur.execute(
+            f"SELECT token, status FROM tokens WHERE stripe_session_id={PH}",
+            (session_id,),
+        )
+        row = cur.fetchone()
+        if row:
+            return row[0], ("existing" if row[1] == "unused" else "used")
+
+        token = secrets.token_urlsafe(16)
+        try:
+            cur.execute(
+                f"""INSERT INTO tokens
+                    (token, created_at, status, tier, stripe_session_id)
+                    VALUES ({PH}, {PH}, 'unused', {PH}, {PH})""",
+                (token, datetime.utcnow().isoformat(), tier, session_id),
+            )
+            db.commit()
+        except Exception as exc:
+            # Two tabs racing the same success URL - re-read the winner's row.
+            logger.info("Race inserting token for session %s: %s", session_id[:20], exc)
+            try:
+                db.rollback()
+            except Exception:
+                pass
+            cur.execute(
+                f"SELECT token, status FROM tokens WHERE stripe_session_id={PH}",
+                (session_id,),
+            )
+            row = cur.fetchone()
+            if row:
+                return row[0], ("existing" if row[1] == "unused" else "used")
+            raise
+    return token, "new"
+
+
+def tier_for_token(token: str) -> str:
+    """Which tier this token was bought at. None if unknown."""
+    if not token:
+        return None
+    init_db()
+    with _conn() as db:
+        cur = db.cursor()
+        cur.execute(f"SELECT tier FROM tokens WHERE token={PH}", (token,))
+        row = cur.fetchone()
+    return row[0] if row and row[0] else None
