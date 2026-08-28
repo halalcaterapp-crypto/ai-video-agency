@@ -26,6 +26,7 @@ from flask import (
     Flask, render_template, request, redirect, url_for, jsonify, send_file, abort
 )
 import config
+import moderation
 import payments
 import pipeline
 import tiers
@@ -189,6 +190,26 @@ def generate():
                                business_address=business_address,
                                business_phone=business_phone,
                                business_website=business_website)
+
+    # Screen the brief before anything is spent on it. This sits ahead of the
+    # logo upload and the token consumption on purpose: a refusal costs the
+    # customer nothing, so a false positive can be corrected and resubmitted
+    # against the same purchase.
+    verdict = moderation.screen_brief(
+        product_name=product_name,
+        target_audience=target_audience,
+        key_benefits=key_benefits,
+        business_type=business_type,
+        tone=tone,
+    )
+    if not verdict.allowed:
+        headline, detail = verdict.customer_message()
+        logger.warning(
+            "Refused order from %s: category=%s layer=%s product=%r",
+            client_email, verdict.category, verdict.layer, product_name[:60],
+        )
+        return render_template("token_error.html",
+                               message=headline, detail=detail), 422
 
     # Handle optional logo upload
     logo_path = None
